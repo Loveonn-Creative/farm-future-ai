@@ -72,19 +72,19 @@ const FAQ = () => {
     {
       icon: Phone,
       title: "Call Us",
-      detail: "+91 98765 43210",
+      detail: "+91 72600 64476",
       description: "Available 24/7 for farmers"
     },
     {
       icon: MessageCircle,
       title: "WhatsApp",
-      detail: "+91 98765 43210", 
+      detail: "+91 72600 64476", 
       description: "Quick support and queries"
     },
     {
       icon: Mail,
       title: "Email",
-      detail: "farmers@agri-ai.com",
+      detail: "farmers@datakhet.com",
       description: "Detailed inquiries and partnerships"
     }
   ];
