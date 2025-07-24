@@ -33,7 +33,7 @@ const HowItWorks = () => {
     name: "Rajesh Kumar",
     location: "Punjab, India",
     crop: "Rice & Wheat",
-    quote: "AgriAI increased my yield by 35% and saved ₹15,000 on fertilizers in just one season. The WhatsApp tips are so easy to follow!",
+    quote: "DataKhet increased my yield by 35% and saved ₹15,000 on fertilizers in just one season. The WhatsApp tips are so easy to follow!",
     results: [
       "35% increase in yield",
       "₹15,000 saved on fertilizers", 
@@ -48,7 +48,7 @@ const HowItWorks = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              How AgriAI Works for You
+              How DataKhet Works for You
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Three simple steps to smarter farming. No technical knowledge required.

@@ -23,7 +23,7 @@ const Onboard = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Welcome to AgriAI! 🌱",
+      title: "Welcome to DataKhet! 🌱",
       description: "We'll contact you within 24 hours to get you started.",
     });
   };

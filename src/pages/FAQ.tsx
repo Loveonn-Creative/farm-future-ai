@@ -27,8 +27,8 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "Do I need a smartphone to use AgriAI?",
-      answer: "No! AgriAI works through simple SMS and WhatsApp messages. You can receive all recommendations, alerts, and tips on any basic mobile phone. We also support voice messages in local languages."
+      question: "Do I need a smartphone to use DataKhet?",
+      answer: "No! DataKhet works through simple SMS and WhatsApp messages. You can receive all recommendations, alerts, and tips on any basic mobile phone. We also support voice messages in local languages."
     },
     {
       question: "How do I install the soil sensors?",
@@ -44,14 +44,14 @@ const FAQ = () => {
     },
     {
       question: "What if I don't speak English?",
-      answer: "AgriAI supports 12 local languages including Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, and Urdu. All recommendations come in your preferred language via SMS or WhatsApp."
+      answer: "DataKhet supports 12 local languages including Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, and Urdu. All recommendations come in your preferred language via SMS or WhatsApp."
     },
     {
       question: "How accurate are the recommendations?",
       answer: "Our AI recommendations have shown 35% average yield improvements across 5,000+ farmers. We combine satellite data, local weather, soil sensors, and crop science to provide highly accurate, personalized advice."
     },
     {
-      question: "Can I sell my crops through AgriAI?",
+      question: "Can I sell my crops through DataKhet?",
       answer: "Yes! Our marketplace connects you directly with verified buyers, exporters, and food processors. We help you get fair prices and handle quality certification. Our farmers typically get 15-20% better prices than local markets."
     },
     {
@@ -99,7 +99,7 @@ const FAQ = () => {
               Frequently Asked Questions
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Get answers to common questions about AgriAI and how we help farmers grow better crops
+              Get answers to common questions about DataKhet and how we help farmers grow better crops
             </p>
           </div>
         </div>

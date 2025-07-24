@@ -91,7 +91,7 @@ const Partners = () => {
               <span className="block text-secondary">1M+ farmers?</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90">
-              Partner with AgriAI to transform agriculture while building profitable business relationships
+              Partner with DataKhet to transform agriculture while building profitable business relationships
             </p>
             <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
               <Handshake className="mr-2 h-5 w-5" />
@@ -269,7 +269,7 @@ const Partners = () => {
             Ready to Transform Agriculture Together?
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Join leading organizations already partnering with AgriAI
+            Join leading organizations already partnering with DataKhet
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 py-4">
