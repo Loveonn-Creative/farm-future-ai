@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, UserPlus, MessageCircle } from "lucide-react";
+import { Home, BookOpen, UserPlus, MessageCircle, ScanLine } from "lucide-react";
 
 const BottomNav = () => {
   const location = useLocation();
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
+    { href: "/soil-scanner", label: "Scan", icon: ScanLine },
     { href: "/how-it-works", label: "How It Works", icon: BookOpen },
     { href: "/onboard", label: "Join", icon: UserPlus },
     { href: "/faq", label: "Contact", icon: MessageCircle },

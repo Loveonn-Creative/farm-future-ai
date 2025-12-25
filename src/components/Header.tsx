@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const Header = () => {
   const navItems = [
     { href: "/", label: "Home" },
+    { href: "/soil-scanner", label: "AI Soil Scanner" },
     { href: "/how-it-works", label: "How It Works" },
     { href: "/features", label: "Features" },
     { href: "/partners", label: "Partners" },
