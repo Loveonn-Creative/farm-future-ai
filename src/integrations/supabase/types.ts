@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      soil_scans: {
+        Row: {
+          analysis_summary: string | null
+          confidence_score: number | null
+          created_at: string
+          extracted_text: string | null
+          id: string
+          image_url: string | null
+          moisture_percentage: number | null
+          nitrogen_level: string | null
+          organic_matter_percentage: number | null
+          ph_level: number | null
+          phosphorus_level: string | null
+          potassium_level: string | null
+          precision_level: string | null
+          raw_response: Json | null
+          recommendations: string[] | null
+          scan_type: string
+          session_id: string | null
+          soil_type: string | null
+        }
+        Insert: {
+          analysis_summary?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          extracted_text?: string | null
+          id?: string
+          image_url?: string | null
+          moisture_percentage?: number | null
+          nitrogen_level?: string | null
+          organic_matter_percentage?: number | null
+          ph_level?: number | null
+          phosphorus_level?: string | null
+          potassium_level?: string | null
+          precision_level?: string | null
+          raw_response?: Json | null
+          recommendations?: string[] | null
+          scan_type?: string
+          session_id?: string | null
+          soil_type?: string | null
+        }
+        Update: {
+          analysis_summary?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          extracted_text?: string | null
+          id?: string
+          image_url?: string | null
+          moisture_percentage?: number | null
+          nitrogen_level?: string | null
+          organic_matter_percentage?: number | null
+          ph_level?: number | null
+          phosphorus_level?: string | null
+          potassium_level?: string | null
+          precision_level?: string | null
+          raw_response?: Json | null
+          recommendations?: string[] | null
+          scan_type?: string
+          session_id?: string | null
+          soil_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

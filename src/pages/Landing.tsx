@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sprout, CloudRain, TrendingUp, ArrowRight } from "lucide-react";
+import { Sprout, CloudRain, TrendingUp, ArrowRight, ScanLine } from "lucide-react";
 import heroImage from "@/assets/hero-farmer.jpg";
 
 const Landing = () => {
@@ -41,17 +41,23 @@ const Landing = () => {
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
               Get daily tips, maximize your crop, and sell at better prices — powered by real data.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center flex-wrap">
+              <Button asChild size="lg" variant="earth">
+                <Link to="/soil-scanner">
+                  <ScanLine className="mr-2 h-5 w-5" />
+                  AI Soil Scanner
+                </Link>
+              </Button>
               <Button asChild size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 <Link to="/onboard">
                   Join as Farmer
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button asChild size="lg" variant="hero">
                 <Link to="/partners">Partner With Us</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button asChild size="lg" variant="hero">
                 <Link to="/vision">Investor Deck</Link>
               </Button>
             </div>
