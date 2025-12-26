@@ -17,11 +17,17 @@ export type Database = {
       soil_scans: {
         Row: {
           analysis_summary: string | null
+          comparison_note: string | null
           confidence_score: number | null
           created_at: string
+          crop_type: string | null
           extracted_text: string | null
           id: string
           image_url: string | null
+          insights: Json | null
+          language: string | null
+          latitude: number | null
+          longitude: number | null
           moisture_percentage: number | null
           nitrogen_level: string | null
           organic_matter_percentage: number | null
@@ -31,17 +37,24 @@ export type Database = {
           precision_level: string | null
           raw_response: Json | null
           recommendations: string[] | null
+          scan_category: string | null
           scan_type: string
           session_id: string | null
           soil_type: string | null
         }
         Insert: {
           analysis_summary?: string | null
+          comparison_note?: string | null
           confidence_score?: number | null
           created_at?: string
+          crop_type?: string | null
           extracted_text?: string | null
           id?: string
           image_url?: string | null
+          insights?: Json | null
+          language?: string | null
+          latitude?: number | null
+          longitude?: number | null
           moisture_percentage?: number | null
           nitrogen_level?: string | null
           organic_matter_percentage?: number | null
@@ -51,17 +64,24 @@ export type Database = {
           precision_level?: string | null
           raw_response?: Json | null
           recommendations?: string[] | null
+          scan_category?: string | null
           scan_type?: string
           session_id?: string | null
           soil_type?: string | null
         }
         Update: {
           analysis_summary?: string | null
+          comparison_note?: string | null
           confidence_score?: number | null
           created_at?: string
+          crop_type?: string | null
           extracted_text?: string | null
           id?: string
           image_url?: string | null
+          insights?: Json | null
+          language?: string | null
+          latitude?: number | null
+          longitude?: number | null
           moisture_percentage?: number | null
           nitrogen_level?: string | null
           organic_matter_percentage?: number | null
@@ -71,6 +91,7 @@ export type Database = {
           precision_level?: string | null
           raw_response?: Json | null
           recommendations?: string[] | null
+          scan_category?: string | null
           scan_type?: string
           session_id?: string | null
           soil_type?: string | null

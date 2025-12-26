@@ -48,33 +48,40 @@ All colors MUST be HSL.
     --fresh-green: 110 60% 45%;
     --soil-dark: 25 45% 15%;
     --cream: 48 40% 95%;
+    
+    /* Warning/Info colors */
+    --warning: 38 92% 50%;
+    --warning-foreground: 25 25% 15%;
+    --info: 200 80% 50%;
+    --info-foreground: 0 0% 98%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
 
     /* Gradients */
     --gradient-earth: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-soil: linear-gradient(180deg, hsl(25 35% 30%), hsl(25 35% 20%));
+    --gradient-crop: linear-gradient(180deg, hsl(110 50% 40%), hsl(110 50% 30%));
 
     /* Shadows */
     --shadow-earth: 0 10px 25px -5px hsl(var(--primary) / 0.2);
     --shadow-soft: 0 4px 12px -2px hsl(var(--foreground) / 0.1);
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.3);
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Typography */
+    --font-hindi: 'Noto Sans Devanagari', sans-serif;
   }
 
   .dark {
@@ -123,5 +130,34 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-hindi), sans-serif;
+  }
+  
+  /* Prevent pull-to-refresh on mobile */
+  html, body {
+    overscroll-behavior: none;
+  }
+}
+
+@layer utilities {
+  .font-hindi {
+    font-family: var(--font-hindi), sans-serif;
+  }
+  
+  /* Organic animations */
+  .animate-soil-settle {
+    animation: soilSettle 3s ease-in-out infinite;
+  }
+  
+  .animate-leaf-pulse {
+    animation: leafPulse 4s ease-in-out infinite;
+  }
+  
+  .animate-sunrise {
+    animation: sunrise 2s ease-out forwards;
+  }
+  
+  .animate-scan-ring {
+    animation: scanRing 2s ease-out infinite;
   }
 }
