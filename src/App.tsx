@@ -9,6 +9,7 @@ import ScanResults from "./pages/ScanResults";
 import History from "./pages/History";
 import Help from "./pages/Help";
 import Pricing from "./pages/Pricing";
+import Subscribe from "./pages/Subscribe";
 import HowItWorks from "./pages/HowItWorks";
 import Onboard from "./pages/Onboard";
 import Features from "./pages/Features";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/help" element={<Help />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/onboard" element={<Onboard />} />
             <Route path="/features" element={<Features />} />

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Camera, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import DesktopNav from "@/components/DesktopNav";
 
 type ScanCategory = "soil" | "crop";
 
@@ -141,6 +142,18 @@ const Home = () => {
 
       if (error) throw error;
 
+      // Check if image was rejected as invalid
+      if (data.is_invalid_image) {
+        toast({
+          title: "गलत तस्वीर",
+          description: data.analysis_summary || "कृपया मिट्टी या फसल की सही तस्वीर लें",
+          variant: "destructive",
+        });
+        setIsAnalyzing(false);
+        setScanCategory(null);
+        return;
+      }
+
       // Store scan result silently
       const { error: insertError } = await supabase.from("soil_scans").insert({
         session_id: sessionId,
@@ -257,6 +270,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Desktop Navigation */}
+      <DesktopNav />
+
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -268,29 +284,35 @@ const Home = () => {
       />
 
       {/* Main content - centered */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20 md:pb-8">
         {/* Single powerful headline */}
         <h1 className="text-2xl md:text-3xl font-bold text-foreground text-center font-hindi animate-sunrise mb-12 leading-relaxed">
           मिट्टी देखो। फसल जानो।<br />
           <span className="text-primary">बेहतर कमाओ।</span>
         </h1>
 
-        {/* Scan buttons */}
-        <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md">
+        {/* Scan buttons - Fixed alignment */}
+        <div className="flex flex-col sm:flex-row gap-8 w-full max-w-lg justify-center items-center">
           {/* Soil Scan Button */}
           <button
             onClick={() => handleScanClick("soil")}
             disabled={isCapturing}
-            className="group relative flex-1 aspect-square max-w-[180px] mx-auto rounded-full bg-gradient-soil flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-soil-settle"
+            className="group relative w-44 h-44 md:w-48 md:h-48 rounded-full bg-gradient-soil flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-soil-settle"
           >
-            <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
-            <span className="text-4xl mb-2">🌾</span>
-            <span className="text-lg font-semibold text-primary-foreground font-hindi">
+            {/* Inner border ring */}
+            <div className="absolute inset-3 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
+            
+            {/* Content centered inside */}
+            <span className="text-4xl mb-1">🌾</span>
+            <span className="text-lg font-semibold text-primary-foreground font-hindi mb-2">
               मिट्टी जांचो
             </span>
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-              <Camera className="w-4 h-4 text-muted-foreground" />
-              <Upload className="w-4 h-4 text-muted-foreground" />
+            
+            {/* Icons row - inside the button */}
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-full px-3 py-1">
+              <Camera className="w-4 h-4 text-primary-foreground/80" />
+              <span className="text-primary-foreground/50 text-xs">|</span>
+              <Upload className="w-4 h-4 text-primary-foreground/80" />
             </div>
           </button>
 
@@ -298,19 +320,30 @@ const Home = () => {
           <button
             onClick={() => handleScanClick("crop")}
             disabled={isCapturing}
-            className="group relative flex-1 aspect-square max-w-[180px] mx-auto rounded-full bg-gradient-crop flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-leaf-pulse"
+            className="group relative w-44 h-44 md:w-48 md:h-48 rounded-full bg-gradient-crop flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-leaf-pulse"
           >
-            <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
-            <span className="text-4xl mb-2">🌱</span>
-            <span className="text-lg font-semibold text-primary-foreground font-hindi">
+            {/* Inner border ring */}
+            <div className="absolute inset-3 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
+            
+            {/* Content centered inside */}
+            <span className="text-4xl mb-1">🌱</span>
+            <span className="text-lg font-semibold text-primary-foreground font-hindi mb-2">
               फसल जांचो
             </span>
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-              <Camera className="w-4 h-4 text-muted-foreground" />
-              <Upload className="w-4 h-4 text-muted-foreground" />
+            
+            {/* Icons row - inside the button */}
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-full px-3 py-1">
+              <Camera className="w-4 h-4 text-primary-foreground/80" />
+              <span className="text-primary-foreground/50 text-xs">|</span>
+              <Upload className="w-4 h-4 text-primary-foreground/80" />
             </div>
           </button>
         </div>
+
+        {/* Helper text for desktop */}
+        <p className="hidden md:block mt-8 text-sm text-muted-foreground font-hindi">
+          फ़ोटो अपलोड करें या कैमरा खोलें
+        </p>
       </main>
     </div>
   );
