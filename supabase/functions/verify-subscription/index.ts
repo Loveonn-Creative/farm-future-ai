@@ -1,0 +1,144 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { phone, accessCode, sessionId } = await req.json();
+    
+    console.log('Verifying subscription:', { phone, accessCode: accessCode?.substring(0, 3) + '***' });
+
+    // Validate inputs
+    if (!phone || phone.length < 10) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: "गलत फ़ोन नंबर" 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!accessCode || accessCode.length !== 9) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: "गलत कोड - 9 अंक होने चाहिए" 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Create Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Clean phone number (last 10 digits)
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+
+    // Check if phone + code combination exists
+    const { data: subscriber, error: selectError } = await supabase
+      .from('subscribers')
+      .select('*')
+      .eq('phone', cleanPhone)
+      .eq('access_code', accessCode)
+      .single();
+
+    if (selectError || !subscriber) {
+      console.log('No matching subscriber found:', selectError?.message);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: "फ़ोन नंबर या कोड गलत है। कृपया सही जानकारी डालें।" 
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check if already activated and expired
+    if (subscriber.is_active && subscriber.expires_at) {
+      const expiresAt = new Date(subscriber.expires_at);
+      if (expiresAt < new Date()) {
+        return new Response(JSON.stringify({ 
+          success: false, 
+          message: "आपकी सदस्यता समाप्त हो गई है। नवीनीकरण के लिए संपर्क करें।" 
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Activate the subscription if not already active
+    if (!subscriber.is_active) {
+      const now = new Date();
+      let expiresAt = new Date();
+      
+      // Set expiry based on plan type
+      switch (subscriber.plan_type) {
+        case 'trial':
+          expiresAt.setDate(expiresAt.getDate() + 7); // 7 days trial
+          break;
+        case '6month':
+          expiresAt.setMonth(expiresAt.getMonth() + 6);
+          break;
+        case '1year':
+          expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+          break;
+        default: // premium (default 6 months)
+          expiresAt.setMonth(expiresAt.getMonth() + 6);
+      }
+
+      const { error: updateError } = await supabase
+        .from('subscribers')
+        .update({
+          is_active: true,
+          activated_at: now.toISOString(),
+          expires_at: expiresAt.toISOString(),
+          session_id: sessionId || subscriber.session_id,
+        })
+        .eq('id', subscriber.id);
+
+      if (updateError) {
+        console.error('Failed to activate subscription:', updateError);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          message: "सक्रियण में त्रुटि। कृपया दोबारा कोशिश करें।" 
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      console.log('Subscription activated successfully:', subscriber.id);
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true,
+      plan_type: subscriber.plan_type,
+      expires_at: subscriber.expires_at,
+      message: "सदस्यता सफल! अब आपको पूरी सुविधा मिलेगी।"
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in verify-subscription:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      message: "कुछ गड़बड़ हुई। कृपया दोबारा कोशिश करें।" 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});

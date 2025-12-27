@@ -98,6 +98,42 @@ export type Database = {
         }
         Relationships: []
       }
+      subscribers: {
+        Row: {
+          access_code: string
+          activated_at: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          phone: string
+          plan_type: string | null
+          session_id: string | null
+        }
+        Insert: {
+          access_code: string
+          activated_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone: string
+          plan_type?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          access_code?: string
+          activated_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone?: string
+          plan_type?: string | null
+          session_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -2,3 +2,6 @@ project_id = "afpxhlhumuoqxrymhyfs"
 
 [functions.analyze-soil]
 verify_jwt = false
+
+[functions.verify-subscription]
+verify_jwt = false
