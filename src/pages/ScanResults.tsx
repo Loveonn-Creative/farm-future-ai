@@ -3,6 +3,7 @@ import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Sh
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
+import VoiceQuestion from "@/components/VoiceQuestion";
 
 interface Insight {
   type: "success" | "warning" | "info";
@@ -386,6 +387,11 @@ const ScanResults = () => {
             </div>
           </div>
         )}
+
+        {/* Voice Q&A Section */}
+        <div className="mt-6 animate-fade-in">
+          <VoiceQuestion soilData={analysis} />
+        </div>
 
         {/* Subscribe CTA - Subtle */}
         <div className="mt-8 p-4 bg-muted/50 rounded-xl text-center animate-fade-in border border-border">
