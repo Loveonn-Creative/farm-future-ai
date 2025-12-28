@@ -1,6 +1,8 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useRef } from "react";
+import { toast } from "@/components/ui/sonner";
 
 interface Insight {
   type: "success" | "warning" | "info";
@@ -38,6 +40,124 @@ const ScanResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { analysis, category } = (location.state as { analysis: AnalysisData; category: string }) || {};
+  
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Generate speech text from insights
+  const generateSpeechText = (): string => {
+    const parts: string[] = [];
+    
+    if (analysis?.soil_type) {
+      parts.push(`आपकी मिट्टी ${analysis.soil_type} है।`);
+    }
+    
+    const insights = generateInsights();
+    insights.forEach(insight => {
+      parts.push(insight.text + "।");
+      if (insight.action) {
+        parts.push(insight.action + "।");
+      }
+    });
+    
+    if (analysis?.recommendations && analysis.recommendations.length > 0) {
+      parts.push("सलाह:");
+      analysis.recommendations.slice(0, 2).forEach(rec => {
+        parts.push(rec + "।");
+      });
+    }
+    
+    return parts.join(" ");
+  };
+
+  // Play voice using ElevenLabs TTS
+  const playVoice = async () => {
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const text = generateSpeechText();
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate voice");
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      audio.onerror = () => {
+        setIsPlaying(false);
+        toast.error("आवाज़ चलाने में समस्या हुई");
+      };
+      
+      await audio.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error("TTS error:", error);
+      toast.error("आवाज़ नहीं चला सकते");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Share via WhatsApp
+  const shareOnWhatsApp = () => {
+    const insights = generateInsights();
+    let message = "🌾 *DataKhet मिट्टी जांच रिपोर्ट*\n\n";
+    
+    if (analysis?.soil_type) {
+      message += `मिट्टी: ${analysis.soil_type}\n`;
+    }
+    
+    if (analysis?.confidence_score) {
+      message += `सटीकता: ${analysis.confidence_score}%\n\n`;
+    }
+    
+    message += "*जांच परिणाम:*\n";
+    insights.forEach(insight => {
+      const icon = insight.type === "success" ? "✅" : insight.type === "warning" ? "⚠️" : "ℹ️";
+      message += `${icon} ${insight.text}`;
+      if (insight.action) {
+        message += ` → ${insight.action}`;
+      }
+      message += "\n";
+    });
+    
+    message += "\n📱 DataKhet ऐप से अपनी मिट्टी जांचें!";
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   if (!analysis) {
     return (
@@ -153,17 +273,42 @@ const ScanResults = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header - Simple */}
+      {/* Header with Voice & Share */}
       <header className="bg-gradient-earth text-primary-foreground p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold font-hindi">
             {category === "crop" ? "🌱 फसल जांच" : "🌾 मिट्टी जांच"}
           </h1>
-          {analysis.confidence_score !== undefined && analysis.confidence_score > 0 && (
-            <span className="text-sm bg-primary-foreground/20 px-2 py-1 rounded-full">
-              {analysis.confidence_score}% सही
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Voice button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={playVoice}
+              disabled={isLoading}
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Volume2 className={`w-5 h-5 ${isPlaying ? "animate-pulse" : ""}`} />
+              )}
+            </Button>
+            {/* WhatsApp Share */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={shareOnWhatsApp}
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              <Share2 className="w-5 h-5" />
+            </Button>
+            {analysis.confidence_score !== undefined && analysis.confidence_score > 0 && (
+              <span className="text-sm bg-primary-foreground/20 px-2 py-1 rounded-full">
+                {analysis.confidence_score}% सही
+              </span>
+            )}
+          </div>
         </div>
       </header>
 
