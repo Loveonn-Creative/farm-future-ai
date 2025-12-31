@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2, Sprout, Wheat, Leaf, Pill, Lightbulb, ScrollText } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2, Sprout, Wheat, Leaf, Pill, Lightbulb, ScrollText, Flower2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
@@ -303,18 +303,30 @@ const ScanResults = () => {
     insights.find(i => i.type === "warning") || 
     insights[0];
 
+  const getCategoryLabel = () => {
+    switch (category) {
+      case "crop": return "फसल जांच";
+      case "kitchen": return "घर का बगीचा";
+      default: return "मिट्टी जांच";
+    }
+  };
+
+  const getCategoryIcon = () => {
+    switch (category) {
+      case "crop": return <Sprout className="w-5 h-5 animate-sprout" />;
+      case "kitchen": return <Flower2 className="w-5 h-5 animate-grow" />;
+      default: return <Wheat className="w-5 h-5 animate-grow" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header with Voice & Share */}
       <header className="bg-gradient-earth text-primary-foreground p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold font-hindi flex items-center gap-2">
-            {category === "crop" ? (
-              <Sprout className="w-5 h-5 animate-sprout" />
-            ) : (
-              <Wheat className="w-5 h-5 animate-grow" />
-            )}
-            {category === "crop" ? "फसल जांच" : "मिट्टी जांच"}
+            {getCategoryIcon()}
+            {getCategoryLabel()}
           </h1>
           <div className="flex items-center gap-2">
             {/* Voice button */}

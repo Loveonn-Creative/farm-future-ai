@@ -70,6 +70,7 @@ IMPORTANT: Based on this history, if previous recommendations didn't help, sugge
     }
 
     const isCrop = scanCategory === 'crop';
+    const isKitchen = scanCategory === 'kitchen';
 
     // STEP 1: Validate the image first
     console.log('Step 1: Validating image type...');
@@ -188,6 +189,71 @@ Respond ONLY with valid JSON:
       "benefit": "क्या फायदा"
     }
   ]
+}`;
+    } else if (isKitchen) {
+      // KITCHEN GARDEN - Simple, home-friendly advice
+      prompt = `You are a friendly home gardening expert fluent in Hindi. Analyze this potted plant or kitchen garden image.
+
+IMPORTANT: This is for HOME GARDENS (गमले, छत, बालकनी) - NOT farm fields. Keep advice SIMPLE and HOME-FRIENDLY.
+
+${previousInputsContext}
+
+ANALYZE:
+1. Plant type (टमाटर, मिर्च, तुलसी, गेंदा, धनिया, पुदीना, etc.)
+2. Health status (healthy/stressed/diseased)
+3. Common home garden problems only
+
+PROVIDE ONLY HOME-FRIENDLY SOLUTIONS:
+- Kitchen ingredients (हल्दी, नमक, बेकिंग सोडा, सिरका, प्याज का पानी)
+- Simple watering tips
+- Sunlight adjustments
+- Repotting advice
+- NO heavy pesticides or farm chemicals
+
+Respond ONLY with valid JSON:
+{
+  "crop_type": "पौधे का नाम",
+  "growth_stage": "छोटा पौधा/बड़ा पौधा/फूल आ रहे हैं/फल आ रहे हैं",
+  "growth_stage_detail": "घरेलू पौधे के लिए सरल सलाह",
+  "health_status": "स्वस्थ/थोड़ी समस्या/बीमार",
+  "disease_detected": {
+    "name": "समस्या का नाम or null",
+    "severity": "हल्का/मध्यम",
+    "affected_area": "कुछ पत्तियां"
+  },
+  "pest_detected": null,
+  "deficiency": "पोषण की कमी or null",
+  "precision_level": "medium",
+  "confidence_score": 75,
+  "analysis_summary": "घर के पौधे के लिए सीधी सलाह - 1 वाक्य में",
+  "control_steps": {
+    "free_remedies": [
+      {
+        "remedy": "घरेलू उपाय का नाम",
+        "how_to_make": "रसोई की चीज़ों से कैसे बनाएं",
+        "how_to_apply": "कैसे लगाएं",
+        "frequency": "हफ्ते में कितनी बार"
+      }
+    ],
+    "paid_remedies": []
+  },
+  "stage_warning": null,
+  "recommendations": ["आसान काम 1", "आसान काम 2"],
+  "primary_action": {
+    "text": "सबसे आसान काम जो अभी कर सकते हैं",
+    "cost": "₹0",
+    "benefit": "पौधा स्वस्थ रहेगा"
+  },
+  "insights": [
+    {
+      "type": "success/warning/info",
+      "text": "मुख्य बात",
+      "action": "क्या करें",
+      "details": "घरेलू तरीका"
+    }
+  ],
+  "soil_type": null,
+  "is_kitchen_garden": true
 }`;
     } else if (isCrop) {
       prompt = `You are an expert crop health analyst and agricultural scientist fluent in Hindi. Analyze this crop/plant image with PRECISION.
@@ -334,7 +400,7 @@ Respond ONLY with valid JSON:
       { 
         role: "user", 
         content: [
-          { type: "text", text: isCrop ? "Analyze this crop image." : "Analyze this soil sample." },
+          { type: "text", text: isKitchen ? "Analyze this home garden plant." : (isCrop ? "Analyze this crop image." : "Analyze this soil sample.") },
           { type: "image_url", image_url: { url: imageBase64 } }
         ]
       }
