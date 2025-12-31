@@ -1,109 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Varied insight templates for non-generic responses
-const insightTemplates = {
-  nitrogen: {
-    low: [
-      { text: "खाद की कमी है", action: "10kg यूरिया डालें", cost: "₹200", benefit: "₹2000 की फसल बचेगी" },
-      { text: "नत्रजन कम → पत्ते पीले पड़ सकते हैं", action: "जैविक खाद या यूरिया डालें", cost: "₹150-250" },
-      { text: "खाद चाहिए → बढ़त रुक सकती है", action: "15 दिन में खाद दें" },
-    ],
-    medium: [
-      { text: "खाद सही है", action: "खाद न डालें, पैसे बचाएं" },
-      { text: "नत्रजन ठीक → फसल की बढ़त अच्छी रहेगी", action: "2 हफ्ते बाद फिर जांचें" },
-    ],
-    high: [
-      { text: "खाद पर्याप्त है", action: "खाद न डालें, नुकसान हो सकता है" },
-      { text: "खाद बहुत है → पैसे बचाएं", action: "अगले महीने तक खाद न डालें" },
-    ],
-  },
-  moisture: {
-    low: [
-      { text: "पानी कम है", action: "आज शाम सिंचाई करें" },
-      { text: "मिट्टी सूखी → फसल को पानी चाहिए", action: "सुबह या शाम पानी दें" },
-      { text: "पानी जरूरी → फसल मुरझा सकती है", action: "जल्द सिंचाई करें" },
-    ],
-    medium: [
-      { text: "पानी सही है", action: "आज सिंचाई न करें, पैसे बचाएं" },
-      { text: "नमी ठीक है → अगले 2 दिन पानी नहीं चाहिए" },
-    ],
-    high: [
-      { text: "पानी ज़्यादा है", action: "2-3 दिन सिंचाई बंद रखें" },
-      { text: "मिट्टी गीली → जड़ सड़ सकती है", action: "पानी न दें, हवा लगने दें" },
-    ],
-  },
-  ph: {
-    acidic: [
-      { text: "मिट्टी तेजाबी है", action: "50kg चूना डालें", cost: "₹300" },
-      { text: "pH कम → ज़्यादातर फसलों के लिए समस्या", action: "चूना या राख मिलाएं" },
-    ],
-    neutral: [
-      { text: "मिट्टी संतुलित है", action: "कोई सुधार जरूरी नहीं" },
-      { text: "pH सही → सभी फसलों के लिए उपयुक्त" },
-    ],
-    alkaline: [
-      { text: "मिट्टी क्षारीय है", action: "जिप्सम डालें" },
-      { text: "pH ज़्यादा → धान के लिए ठीक नहीं", action: "जिप्सम या सल्फर डालें" },
-    ],
-  },
+// Crop growth stages in Hindi
+const growthStages = {
+  wheat: ["अंकुरण", "कल्ले निकलना", "तना बढ़ना", "बालियां आना", "फूल आना", "दाना भरना", "पकाव"],
+  rice: ["अंकुरण", "रोपाई", "कल्ले निकलना", "बालियां आना", "फूल आना", "दाना भरना", "पकाव"],
+  vegetable: ["बीज बोना", "अंकुरण", "पौधा बढ़ना", "फूल आना", "फल आना", "पकाव"],
+  general: ["अंकुरण", "बढ़त", "फूल आना", "फल/दाना", "पकाव"]
 };
 
-// Random pick from array
-const randomPick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-
-// Generate varied insights based on analysis
-const generateInsights = (analysis: any) => {
-  const insights: any[] = [];
-  
-  // Nitrogen
-  if (analysis.nitrogen_level) {
-    const level = analysis.nitrogen_level.toLowerCase();
-    if (level.includes("low") || level.includes("कम")) {
-      const template = randomPick(insightTemplates.nitrogen.low);
-      insights.push({ type: "warning", ...template });
-    } else if (level.includes("high") || level.includes("अधिक")) {
-      const template = randomPick(insightTemplates.nitrogen.high);
-      insights.push({ type: "success", ...template });
-    } else {
-      const template = randomPick(insightTemplates.nitrogen.medium);
-      insights.push({ type: "success", ...template });
-    }
-  }
-
-  // Moisture
-  if (analysis.moisture_percentage !== undefined) {
-    if (analysis.moisture_percentage < 30) {
-      const template = randomPick(insightTemplates.moisture.low);
-      insights.push({ type: "warning", ...template });
-    } else if (analysis.moisture_percentage > 70) {
-      const template = randomPick(insightTemplates.moisture.high);
-      insights.push({ type: "info", ...template });
-    } else {
-      const template = randomPick(insightTemplates.moisture.medium);
-      insights.push({ type: "success", ...template });
-    }
-  }
-
-  // pH
-  if (analysis.ph_level !== undefined) {
-    if (analysis.ph_level < 6) {
-      const template = randomPick(insightTemplates.ph.acidic);
-      insights.push({ type: "warning", ...template });
-    } else if (analysis.ph_level > 8) {
-      const template = randomPick(insightTemplates.ph.alkaline);
-      insights.push({ type: "warning", ...template });
-    } else {
-      const template = randomPick(insightTemplates.ph.neutral);
-      insights.push({ type: "success", ...template });
-    }
-  }
-
-  return insights.slice(0, 4);
+// Stage-appropriate recommendations
+const stageRestrictions: Record<string, string[]> = {
+  "फूल आना": ["खाद न डालें, फूल झड़ सकते हैं", "सिर्फ पानी दें"],
+  "दाना भरना": ["खाद न डालें", "नमी बनाए रखें"],
+  "पकाव": ["खाद न डालें", "पानी कम करें", "कटाई की तैयारी करें"],
 };
 
 serve(async (req) => {
@@ -112,11 +27,46 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, scanType, scanCategory, language = 'hi' } = await req.json();
+    const { imageBase64, scanType, scanCategory, language = 'hi', sessionId } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
+    }
+
+    // Fetch previous scans for context
+    let previousInputsContext = "";
+    if (sessionId && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        const { data: previousScans } = await supabase
+          .from("soil_scans")
+          .select("created_at, nitrogen_level, phosphorus_level, potassium_level, moisture_percentage, ph_level, recommendations, analysis_summary")
+          .eq("session_id", sessionId)
+          .order("created_at", { ascending: false })
+          .limit(3);
+        
+        if (previousScans && previousScans.length > 0) {
+          previousInputsContext = `
+PREVIOUS SCAN HISTORY (use this to avoid repeating ineffective recommendations):
+${previousScans.map((scan, i) => `
+Scan ${i + 1} (${new Date(scan.created_at).toLocaleDateString('hi-IN')}):
+- Nitrogen: ${scan.nitrogen_level || 'N/A'}
+- Phosphorus: ${scan.phosphorus_level || 'N/A'} 
+- Potassium: ${scan.potassium_level || 'N/A'}
+- Moisture: ${scan.moisture_percentage || 'N/A'}%
+- pH: ${scan.ph_level || 'N/A'}
+- Previous advice: ${scan.recommendations?.slice(0, 2).join(', ') || 'None'}
+`).join('')}
+
+IMPORTANT: Based on this history, if previous recommendations didn't help, suggest different solutions.
+`;
+        }
+      } catch (e) {
+        console.log('Could not fetch previous scans:', e);
+      }
     }
 
     const isCrop = scanCategory === 'crop';
@@ -212,6 +162,8 @@ IMPORTANT:
       prompt = `You are an expert agricultural soil scientist fluent in Hindi. Analyze this soil report image.
 Extract all visible data and provide analysis in Hindi for a farmer.
 
+${previousInputsContext}
+
 Respond ONLY with valid JSON:
 {
   "extracted_text": "full OCR text",
@@ -222,45 +174,118 @@ Respond ONLY with valid JSON:
   "potassium_level": "कम/मध्यम/अधिक",
   "organic_matter_percentage": 2.5,
   "moisture_percentage": 35,
-  "precision_level": "low/medium/high",
-  "confidence_score": 85,
+  "precision_level": "high",
+  "confidence_score": 90,
   "analysis_summary": "किसान के लिए 1-2 वाक्य",
   "recommendations": ["आज करें", "इस हफ्ते करें"],
-  "crop_recommendations": [{"crop": "गेहूं", "reason": "इस मिट्टी के लिए सबसे अच्छा"}]
+  "crop_recommendations": [{"crop": "गेहूं", "reason": "इस मिट्टी के लिए सबसे अच्छा"}],
+  "insights": [
+    {
+      "type": "warning/success/info",
+      "text": "मुख्य बात",
+      "action": "क्या करें",
+      "cost": "₹XXX",
+      "benefit": "क्या फायदा"
+    }
+  ]
 }`;
     } else if (isCrop) {
-      prompt = `You are an expert crop health analyst fluent in Hindi. Analyze this crop/plant image.
+      prompt = `You are an expert crop health analyst and agricultural scientist fluent in Hindi. Analyze this crop/plant image with PRECISION.
 
-Evaluate:
-1. Crop type identification
-2. Health status (diseases, pests, deficiencies)
-3. Growth stage
-4. Immediate concerns
+${previousInputsContext}
 
-Be SPECIFIC. If you see disease or pest damage, name it.
-If plant looks healthy, say so clearly.
+CRITICAL ANALYSIS REQUIREMENTS:
+1. CROP TYPE: Identify exact crop (गेहूं, धान, टमाटर, आलू, etc.)
+2. GROWTH STAGE: Identify exact stage from this list:
+   - अंकुरण (germination/seedling)
+   - कल्ले निकलना (tillering) 
+   - तना बढ़ना (stem elongation)
+   - बालियां आना (heading/booting)
+   - फूल आना (flowering)
+   - दाना भरना (grain filling)
+   - पकाव (maturity/ripening)
+
+3. DISEASE DETECTION (if any):
+   - EXACT disease name in Hindi
+   - Severity: हल्का (mild) / मध्यम (moderate) / गंभीर (severe)
+   - Affected area percentage
+
+4. CONTROL STEPS - IN THIS ORDER:
+   a) FREE/NATURAL remedies FIRST:
+      - नीम का काढ़ा (100g नीम पत्ती को 5L पानी में उबालें)
+      - गोमूत्र (1:10 पानी में मिलाकर)
+      - राख छिड़काव
+      - हल्दी + चूना पेस्ट
+   b) PAID solutions ONLY if natural won't work:
+      - Exact medicine name
+      - Exact dosage (ml/gram per liter)
+      - Exact timing (सुबह 7 बजे से पहले या शाम 5 बजे के बाद)
+      - Cost estimate
+
+5. STAGE-SPECIFIC WARNINGS:
+   - If flowering: "फूल आ रहे हैं - खाद न डालें"
+   - If grain filling: "दाना भर रहा है - सिर्फ नमी रखें"
+   - If maturity: "पकाव शुरू है - पानी कम करें"
 
 Respond ONLY with valid JSON:
 {
-  "crop_type": "फसल का नाम",
+  "crop_type": "फसल का नाम (गेहूं/धान/टमाटर/etc.)",
+  "growth_stage": "exact stage from list above",
+  "growth_stage_detail": "इस अवस्था में पौधे को क्या चाहिए",
   "health_status": "स्वस्थ/चिंताजनक/गंभीर",
-  "growth_stage": "अंकुरण/बढ़त/फूल/फल",
-  "disease_detected": null or "रोग का नाम",
-  "pest_detected": null or "कीट का नाम",
-  "deficiency": null or "कमी का नाम",
+  "disease_detected": {
+    "name": "रोग का नाम or null",
+    "severity": "हल्का/मध्यम/गंभीर",
+    "affected_area": "10-20%"
+  },
+  "pest_detected": {
+    "name": "कीट का नाम or null",
+    "severity": "हल्का/मध्यम/गंभीर"
+  },
+  "deficiency": "पोषक तत्व की कमी or null",
   "precision_level": "low/medium/high",
   "confidence_score": 80,
-  "analysis_summary": "किसान के लिए 1-2 वाक्य - क्या करना है",
+  "analysis_summary": "किसान के लिए सीधी बात - क्या समस्या है और क्या करना है",
+  "control_steps": {
+    "free_remedies": [
+      {
+        "remedy": "नीम का काढ़ा",
+        "how_to_make": "100g नीम पत्ती को 5L पानी में 20 मिनट उबालें, ठंडा करें, छान लें",
+        "how_to_apply": "सुबह 7 बजे से पहले पत्तियों पर छिड़काव करें",
+        "frequency": "हर 5 दिन में, 3 बार"
+      }
+    ],
+    "paid_remedies": [
+      {
+        "medicine": "दवाई का नाम",
+        "dosage": "2ml प्रति लीटर पानी",
+        "timing": "शाम 5 बजे के बाद",
+        "cost": "₹180/100ml",
+        "when_needed": "अगर 7 दिन में सुधार न हो"
+      }
+    ]
+  },
+  "stage_warning": "इस अवस्था में क्या न करें",
   "recommendations": ["तुरंत करें", "अगले हफ्ते करें"],
   "primary_action": {
-    "text": "सबसे जरूरी काम",
-    "cost": "₹XXX अगर लागू हो",
+    "text": "सबसे जरूरी काम - बहुत स्पष्ट",
+    "cost": "₹0 or ₹XXX",
     "benefit": "क्या फायदा होगा"
   },
+  "insights": [
+    {
+      "type": "warning",
+      "text": "मुख्य चेतावनी",
+      "action": "क्या करें",
+      "details": "विस्तृत जानकारी"
+    }
+  ],
   "soil_type": null
 }`;
     } else {
-      prompt = `You are an expert agricultural soil scientist fluent in Hindi. Analyze this soil image.
+      prompt = `You are an expert agricultural soil scientist fluent in Hindi. Analyze this soil image with PRECISION.
+
+${previousInputsContext}
 
 Evaluate from VISUAL cues:
 1. Soil type (clay/sandy/loamy based on color, texture)
@@ -270,6 +295,8 @@ Evaluate from VISUAL cues:
 
 Be HONEST about confidence. If soil looks dry, say moisture is low.
 If it looks dark/rich, organic matter is good.
+
+IMPORTANT: Give STAGE-APPROPRIATE advice. Don't suggest compost if it's not the right time.
 
 Respond ONLY with valid JSON:
 {
@@ -289,6 +316,15 @@ Respond ONLY with valid JSON:
     "cost": "₹XXX अगर लागू हो",
     "benefit": "क्या फायदा होगा"
   },
+  "insights": [
+    {
+      "type": "warning/success/info",
+      "text": "मुख्य बात",
+      "action": "क्या करें",
+      "cost": "₹XXX",
+      "benefit": "क्या फायदा"
+    }
+  ],
   "crop_recommendations": [{"crop": "धान", "reason": "इस मिट्टी के लिए उपयुक्त"}]
 }`;
     }
@@ -359,8 +395,6 @@ Respond ONLY with valid JSON:
       };
     }
 
-    // Add varied insights
-    analysisResult.insights = generateInsights(analysisResult);
     analysisResult.is_invalid_image = false;
 
     return new Response(JSON.stringify(analysisResult), {
