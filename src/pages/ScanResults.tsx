@@ -12,6 +12,25 @@ interface Insight {
   action?: string;
   cost?: string;
   benefit?: string;
+  details?: string;
+}
+
+interface ControlStep {
+  remedy?: string;
+  medicine?: string;
+  how_to_make?: string;
+  how_to_apply?: string;
+  frequency?: string;
+  dosage?: string;
+  timing?: string;
+  cost?: string;
+  when_needed?: string;
+}
+
+interface DiseaseInfo {
+  name: string | null;
+  severity: string;
+  affected_area?: string;
 }
 
 interface AnalysisData {
@@ -35,6 +54,18 @@ interface AnalysisData {
     cost?: string;
     benefit?: string;
   };
+  // Enhanced crop disease fields
+  growth_stage?: string;
+  growth_stage_detail?: string;
+  health_status?: string;
+  disease_detected?: DiseaseInfo;
+  pest_detected?: DiseaseInfo;
+  deficiency?: string;
+  control_steps?: {
+    free_remedies?: ControlStep[];
+    paid_remedies?: ControlStep[];
+  };
+  stage_warning?: string;
 }
 
 const ScanResults = () => {
@@ -315,13 +346,78 @@ const ScanResults = () => {
 
       {/* Main content */}
       <main className="p-4 space-y-4">
-        {/* Type badge */}
+        {/* Type badge with growth stage */}
         {(analysis.soil_type || analysis.crop_type) && (
           <div className="bg-card rounded-xl p-4 shadow-soft animate-fade-in">
-            <span className="text-lg font-hindi font-semibold text-foreground">
-              {category === "crop" ? "🌱 " : "🌾 "}
-              {analysis.soil_type || analysis.crop_type}
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-hindi font-semibold text-foreground">
+                {category === "crop" ? "🌱 " : "🌾 "}
+                {analysis.soil_type || analysis.crop_type}
+              </span>
+              {analysis.health_status && (
+                <span className={`text-xs px-2 py-1 rounded-full font-hindi ${
+                  analysis.health_status === "स्वस्थ" 
+                    ? "bg-success/10 text-success" 
+                    : analysis.health_status === "गंभीर"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-warning/10 text-warning"
+                }`}>
+                  {analysis.health_status}
+                </span>
+              )}
+            </div>
+            {/* Growth stage */}
+            {analysis.growth_stage && (
+              <div className="mt-2 pt-2 border-t border-border">
+                <p className="text-sm text-muted-foreground font-hindi">
+                  अवस्था: <span className="text-foreground font-medium">{analysis.growth_stage}</span>
+                </p>
+                {analysis.growth_stage_detail && (
+                  <p className="text-xs text-muted-foreground font-hindi mt-1">
+                    {analysis.growth_stage_detail}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Stage Warning */}
+        {analysis.stage_warning && (
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 animate-fade-in">
+            <p className="text-sm font-hindi text-warning flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              {analysis.stage_warning}
+            </p>
+          </div>
+        )}
+
+        {/* Disease/Pest Alert */}
+        {(analysis.disease_detected?.name || analysis.pest_detected?.name) && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 animate-fade-in">
+            <h3 className="font-semibold font-hindi text-destructive flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-5 h-5" />
+              {analysis.disease_detected?.name ? "रोग पहचाना गया" : "कीट पहचाना गया"}
+            </h3>
+            <div className="space-y-1">
+              <p className="font-hindi text-foreground">
+                <span className="font-medium">{analysis.disease_detected?.name || analysis.pest_detected?.name}</span>
+              </p>
+              {(analysis.disease_detected?.severity || analysis.pest_detected?.severity) && (
+                <p className="text-sm font-hindi">
+                  गंभीरता: <span className={`font-medium ${
+                    (analysis.disease_detected?.severity || analysis.pest_detected?.severity) === "गंभीर" 
+                      ? "text-destructive" 
+                      : "text-warning"
+                  }`}>
+                    {analysis.disease_detected?.severity || analysis.pest_detected?.severity}
+                  </span>
+                  {analysis.disease_detected?.affected_area && (
+                    <span className="text-muted-foreground"> ({analysis.disease_detected.affected_area} प्रभावित)</span>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -333,7 +429,7 @@ const ScanResults = () => {
               {(primaryAction as Insight).action || primaryAction.text}
             </p>
             {(primaryAction.cost || primaryAction.benefit) && (
-              <div className="flex items-center gap-4 mt-3 text-sm">
+              <div className="flex items-center gap-4 mt-3 text-sm flex-wrap">
                 {primaryAction.cost && (
                   <span className="flex items-center gap-1 bg-primary-foreground/20 px-2 py-1 rounded">
                     <IndianRupee className="w-3 h-3" />
@@ -350,26 +446,100 @@ const ScanResults = () => {
           </div>
         )}
 
-        {/* Other insights - Simpler cards */}
-        <div className="space-y-3">
-          {insights.slice(1).map((insight, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-3 p-4 bg-card rounded-xl shadow-soft animate-sunrise"
-              style={{ animationDelay: `${(index + 1) * 0.1}s` }}
-            >
-              {getInsightIcon(insight.type)}
-              <div className="flex-1">
-                <p className="font-hindi text-foreground font-medium">{insight.text}</p>
-                {insight.action && (
-                  <p className="text-sm text-primary font-hindi mt-1">
-                    → {insight.action}
-                  </p>
-                )}
-              </div>
+        {/* Control Steps - Free Remedies First */}
+        {analysis.control_steps?.free_remedies && analysis.control_steps.free_remedies.length > 0 && (
+          <div className="animate-fade-in">
+            <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
+              <span>🌿</span> मुफ्त/घरेलू उपाय
+            </h2>
+            <div className="space-y-3">
+              {analysis.control_steps.free_remedies.map((step, index) => (
+                <div key={index} className="bg-success/5 border border-success/20 rounded-xl p-4">
+                  <p className="font-semibold font-hindi text-foreground">{step.remedy}</p>
+                  {step.how_to_make && (
+                    <p className="text-sm text-muted-foreground font-hindi mt-1">
+                      <span className="text-success">बनाएं:</span> {step.how_to_make}
+                    </p>
+                  )}
+                  {step.how_to_apply && (
+                    <p className="text-sm text-muted-foreground font-hindi mt-1">
+                      <span className="text-success">लगाएं:</span> {step.how_to_apply}
+                    </p>
+                  )}
+                  {step.frequency && (
+                    <p className="text-sm text-muted-foreground font-hindi mt-1">
+                      <span className="text-success">कितनी बार:</span> {step.frequency}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {/* Control Steps - Paid Remedies */}
+        {analysis.control_steps?.paid_remedies && analysis.control_steps.paid_remedies.length > 0 && (
+          <div className="animate-fade-in">
+            <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
+              <span>💊</span> दवाई (अगर घरेलू उपाय से फायदा न हो)
+            </h2>
+            <div className="space-y-3">
+              {analysis.control_steps.paid_remedies.map((step, index) => (
+                <div key={index} className="bg-muted/50 border border-border rounded-xl p-4">
+                  <div className="flex items-start justify-between">
+                    <p className="font-semibold font-hindi text-foreground">{step.medicine}</p>
+                    {step.cost && (
+                      <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{step.cost}</span>
+                    )}
+                  </div>
+                  {step.dosage && (
+                    <p className="text-sm text-muted-foreground font-hindi mt-1">
+                      <span className="text-primary">मात्रा:</span> {step.dosage}
+                    </p>
+                  )}
+                  {step.timing && (
+                    <p className="text-sm text-muted-foreground font-hindi mt-1">
+                      <span className="text-primary">समय:</span> {step.timing}
+                    </p>
+                  )}
+                  {step.when_needed && (
+                    <p className="text-xs text-muted-foreground font-hindi mt-2 italic">
+                      {step.when_needed}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Other insights - Simpler cards */}
+        {insights.length > 1 && (
+          <div className="space-y-3">
+            {insights.slice(1).map((insight, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-3 p-4 bg-card rounded-xl shadow-soft animate-sunrise"
+                style={{ animationDelay: `${(index + 1) * 0.1}s` }}
+              >
+                {getInsightIcon(insight.type)}
+                <div className="flex-1">
+                  <p className="font-hindi text-foreground font-medium">{insight.text}</p>
+                  {insight.action && (
+                    <p className="text-sm text-primary font-hindi mt-1">
+                      → {insight.action}
+                    </p>
+                  )}
+                  {insight.details && (
+                    <p className="text-xs text-muted-foreground font-hindi mt-1">
+                      {insight.details}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Crop recommendations if available */}
         {analysis.crop_recommendations && analysis.crop_recommendations.length > 0 && (
