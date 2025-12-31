@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2, Sprout, Wheat, Leaf, Pill, Lightbulb, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
@@ -308,8 +308,13 @@ const ScanResults = () => {
       {/* Header with Voice & Share */}
       <header className="bg-gradient-earth text-primary-foreground p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold font-hindi">
-            {category === "crop" ? "🌱 फसल जांच" : "🌾 मिट्टी जांच"}
+          <h1 className="text-xl font-bold font-hindi flex items-center gap-2">
+            {category === "crop" ? (
+              <Sprout className="w-5 h-5 animate-sprout" />
+            ) : (
+              <Wheat className="w-5 h-5 animate-grow" />
+            )}
+            {category === "crop" ? "फसल जांच" : "मिट्टी जांच"}
           </h1>
           <div className="flex items-center gap-2">
             {/* Voice button */}
@@ -318,12 +323,12 @@ const ScanResults = () => {
               size="icon"
               onClick={playVoice}
               disabled={isLoading}
-              className="text-primary-foreground hover:bg-primary-foreground/20"
+              className="text-primary-foreground hover:bg-primary-foreground/20 transition-transform hover:scale-105"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Volume2 className={`w-5 h-5 ${isPlaying ? "animate-pulse" : ""}`} />
+                <Volume2 className={`w-5 h-5 ${isPlaying ? "animate-pulse-gentle" : ""}`} />
               )}
             </Button>
             {/* WhatsApp Share */}
@@ -331,12 +336,12 @@ const ScanResults = () => {
               variant="ghost"
               size="icon"
               onClick={shareOnWhatsApp}
-              className="text-primary-foreground hover:bg-primary-foreground/20"
+              className="text-primary-foreground hover:bg-primary-foreground/20 transition-transform hover:scale-105"
             >
               <Share2 className="w-5 h-5" />
             </Button>
             {analysis.confidence_score !== undefined && analysis.confidence_score > 0 && (
-              <span className="text-sm bg-primary-foreground/20 px-2 py-1 rounded-full">
+              <span className="text-sm bg-primary-foreground/20 px-2 py-1 rounded-full animate-slide-up">
                 {analysis.confidence_score}% सही
               </span>
             )}
@@ -348,19 +353,23 @@ const ScanResults = () => {
       <main className="p-4 space-y-4">
         {/* Type badge with growth stage */}
         {(analysis.soil_type || analysis.crop_type) && (
-          <div className="bg-card rounded-xl p-4 shadow-soft animate-fade-in">
+          <div className="bg-card rounded-xl p-4 shadow-soft animate-slide-up">
             <div className="flex items-center justify-between">
-              <span className="text-lg font-hindi font-semibold text-foreground">
-                {category === "crop" ? "🌱 " : "🌾 "}
+              <span className="text-lg font-hindi font-semibold text-foreground flex items-center gap-2">
+                {category === "crop" ? (
+                  <Sprout className="w-5 h-5 text-accent animate-grow" />
+                ) : (
+                  <Wheat className="w-5 h-5 text-primary animate-pulse-gentle" />
+                )}
                 {analysis.soil_type || analysis.crop_type}
               </span>
               {analysis.health_status && (
-                <span className={`text-xs px-2 py-1 rounded-full font-hindi ${
+                <span className={`text-xs px-2 py-1 rounded-full font-hindi transition-all ${
                   analysis.health_status === "स्वस्थ" 
-                    ? "bg-success/10 text-success" 
+                    ? "bg-success/10 text-success animate-glow" 
                     : analysis.health_status === "गंभीर"
-                    ? "bg-destructive/10 text-destructive"
-                    : "bg-warning/10 text-warning"
+                    ? "bg-destructive/10 text-destructive animate-shake-gentle"
+                    : "bg-warning/10 text-warning animate-pulse-gentle"
                 }`}>
                   {analysis.health_status}
                 </span>
@@ -369,7 +378,8 @@ const ScanResults = () => {
             {/* Growth stage */}
             {analysis.growth_stage && (
               <div className="mt-2 pt-2 border-t border-border">
-                <p className="text-sm text-muted-foreground font-hindi">
+                <p className="text-sm text-muted-foreground font-hindi flex items-center gap-1">
+                  <Leaf className="w-3 h-3 text-accent" />
                   अवस्था: <span className="text-foreground font-medium">{analysis.growth_stage}</span>
                 </p>
                 {analysis.growth_stage_detail && (
@@ -384,9 +394,9 @@ const ScanResults = () => {
 
         {/* Stage Warning */}
         {analysis.stage_warning && (
-          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 animate-fade-in">
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 animate-slide-up">
             <p className="text-sm font-hindi text-warning flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
+              <AlertTriangle className="w-4 h-4 animate-bounce-soft" />
               {analysis.stage_warning}
             </p>
           </div>
@@ -394,9 +404,9 @@ const ScanResults = () => {
 
         {/* Disease/Pest Alert */}
         {(analysis.disease_detected?.name || analysis.pest_detected?.name) && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 animate-fade-in">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 animate-slide-up">
             <h3 className="font-semibold font-hindi text-destructive flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-5 h-5" />
+              <AlertTriangle className="w-5 h-5 animate-shake-gentle" />
               {analysis.disease_detected?.name ? "रोग पहचाना गया" : "कीट पहचाना गया"}
             </h3>
             <div className="space-y-1">
@@ -448,9 +458,9 @@ const ScanResults = () => {
 
         {/* Control Steps - Free Remedies First */}
         {analysis.control_steps?.free_remedies && analysis.control_steps.free_remedies.length > 0 && (
-          <div className="animate-fade-in">
+          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
-              <span>🌿</span> मुफ्त/घरेलू उपाय
+              <Leaf className="w-5 h-5 text-success animate-grow" /> मुफ्त/घरेलू उपाय
             </h2>
             <div className="space-y-3">
               {analysis.control_steps.free_remedies.map((step, index) => (
@@ -479,9 +489,9 @@ const ScanResults = () => {
 
         {/* Control Steps - Paid Remedies */}
         {analysis.control_steps?.paid_remedies && analysis.control_steps.paid_remedies.length > 0 && (
-          <div className="animate-fade-in">
+          <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
-              <span>💊</span> दवाई (अगर घरेलू उपाय से फायदा न हो)
+              <Pill className="w-5 h-5 text-primary animate-pulse-gentle" /> दवाई (अगर घरेलू उपाय से फायदा न हो)
             </h2>
             <div className="space-y-3">
               {analysis.control_steps.paid_remedies.map((step, index) => (
@@ -519,8 +529,8 @@ const ScanResults = () => {
             {insights.slice(1).map((insight, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 bg-card rounded-xl shadow-soft animate-sunrise"
-                style={{ animationDelay: `${(index + 1) * 0.1}s` }}
+                className="flex items-start gap-3 p-4 bg-card rounded-xl shadow-soft animate-slide-up"
+                style={{ animationDelay: `${(index + 1) * 0.08}s` }}
               >
                 {getInsightIcon(insight.type)}
                 <div className="flex-1">
@@ -543,9 +553,9 @@ const ScanResults = () => {
 
         {/* Crop recommendations if available */}
         {analysis.crop_recommendations && analysis.crop_recommendations.length > 0 && (
-          <div className="mt-6 animate-fade-in">
+          <div className="mt-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
-              <span>💡</span> इस मिट्टी के लिए सही फसल
+              <Lightbulb className="w-5 h-5 text-warning animate-glow" /> इस मिट्टी के लिए सही फसल
             </h2>
             <div className="space-y-2">
               {analysis.crop_recommendations.slice(0, 3).map((rec, index) => (
