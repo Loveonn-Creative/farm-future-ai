@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { hi } from "date-fns/locale";
-import { Loader2, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, ScrollText, Sprout, Wheat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -165,8 +165,9 @@ const History = () => {
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="bg-gradient-earth text-primary-foreground p-4">
-        <h1 className="text-xl font-bold font-hindi text-center">
-          📜 पिछली जांचें
+        <h1 className="text-xl font-bold font-hindi text-center flex items-center justify-center gap-2">
+          <ScrollText className="w-5 h-5 animate-sprout" />
+          पिछली जांचें
         </h1>
       </header>
 
@@ -202,16 +203,18 @@ const History = () => {
                         onOpenChange={() => setExpandedId(isExpanded ? null : scan.id)}
                       >
                         <div
-                          className="bg-card rounded-lg shadow-soft animate-sunrise overflow-hidden"
+                          className="bg-card rounded-lg shadow-soft animate-slide-up overflow-hidden transition-shadow hover:shadow-earth"
                           style={{ animationDelay: `${index * 0.05}s` }}
                         >
                           <CollapsibleTrigger className="w-full p-4 text-left">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-lg">
-                                    {scan.scan_category === "crop" ? "🌱" : "🌾"}
-                                  </span>
+                                  {scan.scan_category === "crop" ? (
+                                    <Sprout className="w-5 h-5 text-accent animate-grow" />
+                                  ) : (
+                                    <Wheat className="w-5 h-5 text-primary animate-pulse-gentle" />
+                                  )}
                                   <span className="font-semibold font-hindi">
                                     {scan.soil_type || scan.crop_type || (scan.scan_category === "crop" ? "फसल जांच" : "मिट्टी जांच")}
                                   </span>
@@ -314,9 +317,10 @@ const History = () => {
 
         {/* Improvement note if we have scans */}
         {scans.length >= 2 && (
-          <div className="mt-6 p-4 bg-success/10 rounded-lg text-center animate-fade-in">
-            <p className="font-hindi text-success">
-              🌱 आपकी जमीन की जानकारी बढ़ रही है
+          <div className="mt-6 p-4 bg-success/10 rounded-lg text-center animate-slide-up border border-success/20">
+            <p className="font-hindi text-success flex items-center justify-center gap-2">
+              <Sprout className="w-4 h-4 animate-grow" />
+              आपकी जमीन की जानकारी बढ़ रही है
             </p>
             <p className="text-xs text-muted-foreground font-hindi mt-1">
               {scans.length} जांचें हो चुकी हैं
