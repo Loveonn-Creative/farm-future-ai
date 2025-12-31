@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, Sprout, Wheat, Flower2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DesktopNav from "@/components/DesktopNav";
 
-type ScanCategory = "soil" | "crop";
+type ScanCategory = "soil" | "crop" | "kitchen";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -241,7 +241,7 @@ const Home = () => {
             <div className="w-14 h-14" /> {/* Spacer for balance */}
           </div>
           <p className="text-center text-primary-foreground/80 mt-4 font-hindi">
-            {scanCategory === "soil" ? "मिट्टी को फ्रेम में रखें" : "फसल को फ्रेम में रखें"}
+            {scanCategory === "soil" ? "मिट्टी को फ्रेम में रखें" : scanCategory === "kitchen" ? "पौधे को फ्रेम में रखें" : "फसल को फ्रेम में रखें"}
           </p>
         </div>
       </div>
@@ -259,7 +259,7 @@ const Home = () => {
           <div className="absolute inset-0 rounded-full border-4 border-primary/30 animate-scan-ring" />
         </div>
         <p className="mt-8 text-xl font-hindi text-foreground text-center animate-fade-in">
-          {scanCategory === "soil" ? "मिट्टी की जांच हो रही है..." : "फसल की जांच हो रही है..."}
+          {scanCategory === "soil" ? "मिट्टी की जांच हो रही है..." : scanCategory === "kitchen" ? "पौधे की जांच हो रही है..." : "फसल की जांच हो रही है..."}
         </p>
         <p className="mt-2 text-muted-foreground font-hindi animate-fade-in">
           कृपया प्रतीक्षा करें
@@ -291,28 +291,23 @@ const Home = () => {
           <span className="text-primary">बेहतर कमाओ।</span>
         </h1>
 
-        {/* Scan buttons - Fixed alignment */}
-        <div className="flex flex-col sm:flex-row gap-8 w-full max-w-lg justify-center items-center">
+        {/* Scan buttons - Grid layout for 3 buttons */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full max-w-2xl">
           {/* Soil Scan Button */}
           <button
             onClick={() => handleScanClick("soil")}
             disabled={isCapturing}
-            className="group relative w-44 h-44 md:w-48 md:h-48 rounded-full bg-gradient-soil flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-soil-settle"
+            className="group relative aspect-square max-w-[160px] md:max-w-[180px] mx-auto w-full rounded-full bg-gradient-soil flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-soil-settle"
           >
-            {/* Inner border ring */}
-            <div className="absolute inset-3 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
-            
-            {/* Content centered inside */}
-            <span className="text-4xl mb-1">🌾</span>
-            <span className="text-lg font-semibold text-primary-foreground font-hindi mb-2">
+            <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
+            <Wheat className="w-8 h-8 text-primary-foreground mb-1 animate-pulse-gentle" />
+            <span className="text-sm md:text-base font-semibold text-primary-foreground font-hindi mb-1">
               मिट्टी जांचो
             </span>
-            
-            {/* Icons row - inside the button */}
-            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-full px-3 py-1">
-              <Camera className="w-4 h-4 text-primary-foreground/80" />
+            <div className="flex items-center gap-1 bg-primary-foreground/10 rounded-full px-2 py-0.5">
+              <Camera className="w-3 h-3 text-primary-foreground/80" />
               <span className="text-primary-foreground/50 text-xs">|</span>
-              <Upload className="w-4 h-4 text-primary-foreground/80" />
+              <Upload className="w-3 h-3 text-primary-foreground/80" />
             </div>
           </button>
 
@@ -320,22 +315,36 @@ const Home = () => {
           <button
             onClick={() => handleScanClick("crop")}
             disabled={isCapturing}
-            className="group relative w-44 h-44 md:w-48 md:h-48 rounded-full bg-gradient-crop flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-leaf-pulse"
+            className="group relative aspect-square max-w-[160px] md:max-w-[180px] mx-auto w-full rounded-full bg-gradient-crop flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-leaf-pulse"
           >
-            {/* Inner border ring */}
-            <div className="absolute inset-3 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
-            
-            {/* Content centered inside */}
-            <span className="text-4xl mb-1">🌱</span>
-            <span className="text-lg font-semibold text-primary-foreground font-hindi mb-2">
+            <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
+            <Sprout className="w-8 h-8 text-primary-foreground mb-1 animate-grow" />
+            <span className="text-sm md:text-base font-semibold text-primary-foreground font-hindi mb-1">
               फसल जांचो
             </span>
-            
-            {/* Icons row - inside the button */}
-            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-full px-3 py-1">
-              <Camera className="w-4 h-4 text-primary-foreground/80" />
+            <div className="flex items-center gap-1 bg-primary-foreground/10 rounded-full px-2 py-0.5">
+              <Camera className="w-3 h-3 text-primary-foreground/80" />
               <span className="text-primary-foreground/50 text-xs">|</span>
-              <Upload className="w-4 h-4 text-primary-foreground/80" />
+              <Upload className="w-3 h-3 text-primary-foreground/80" />
+            </div>
+          </button>
+
+          {/* Kitchen Garden Button - spans full width on mobile */}
+          <button
+            onClick={() => handleScanClick("kitchen")}
+            disabled={isCapturing}
+            className="group relative aspect-square max-w-[160px] md:max-w-[180px] mx-auto w-full rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-sprout col-span-2 md:col-span-1"
+          >
+            <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
+            <Flower2 className="w-8 h-8 text-primary-foreground mb-1 animate-grow" />
+            <span className="text-sm md:text-base font-semibold text-primary-foreground font-hindi mb-1">
+              घर का बगीचा
+            </span>
+            <span className="text-xs text-primary-foreground/70 font-hindi -mt-1 mb-1">गमले / छत</span>
+            <div className="flex items-center gap-1 bg-primary-foreground/10 rounded-full px-2 py-0.5">
+              <Camera className="w-3 h-3 text-primary-foreground/80" />
+              <span className="text-primary-foreground/50 text-xs">|</span>
+              <Upload className="w-3 h-3 text-primary-foreground/80" />
             </div>
           </button>
         </div>
