@@ -1,116 +1,182 @@
 import { Link } from "react-router-dom";
-import { Sprout, TrendingUp, IndianRupee, ArrowRight, ChevronLeft } from "lucide-react";
+import { Sprout, TrendingUp, IndianRupee, ArrowRight, Users, Target, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import SecondaryNav from "@/components/SecondaryNav";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const About = () => {
+  const { t, isHindi } = useLanguage();
+  
   const pillars = [
     {
       icon: <Sprout className="w-8 h-8" />,
-      title: "मिट्टी देखभाल",
-      description: "AI से मिट्टी जांचें, सही खाद डालें",
+      title: t('pillar_soil'),
+      description: t('pillar_soil_desc'),
       color: "bg-earth-brown/10 text-earth-brown",
     },
     {
       icon: <TrendingUp className="w-8 h-8" />,
-      title: "फसल देखभाल",
-      description: "बीमारी पहचानें, समय पर इलाज करें",
+      title: t('pillar_crop'),
+      description: t('pillar_crop_desc'),
       color: "bg-success/10 text-success",
     },
     {
       icon: <IndianRupee className="w-8 h-8" />,
-      title: "सही दाम",
-      description: "बाज़ार से जुड़ें, उचित मूल्य पाएं",
+      title: t('pillar_price'),
+      description: t('pillar_price_desc'),
       color: "bg-primary/10 text-primary",
     },
+  ];
+  
+  const features = [
+    {
+      icon: Smartphone,
+      title: isHindi ? "सरल इंटरफ़ेस" : "Simple Interface",
+      desc: isHindi ? "कोई भी किसान आसानी से उपयोग कर सकता है" : "Any farmer can use it easily"
+    },
+    {
+      icon: Target,
+      title: isHindi ? "सटीक विश्लेषण" : "Accurate Analysis",
+      desc: isHindi ? "AI-संचालित मिट्टी और फसल जांच" : "AI-powered soil and crop analysis"
+    },
+    {
+      icon: Users,
+      title: isHindi ? "किसान समुदाय" : "Farmer Community",
+      desc: isHindi ? "हज़ारों किसानों का भरोसा" : "Trusted by thousands of farmers"
+    }
   ];
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <header className="bg-gradient-earth text-primary-foreground p-6 text-center">
-        <h1 className="text-3xl font-bold font-hindi animate-sunrise">
-          मिट्टी से बाज़ार तक
+      <SecondaryNav title={t('nav_about')} />
+      
+      {/* Hero */}
+      <header className="bg-gradient-earth text-primary-foreground py-10 px-4 text-center">
+        <h1 className={`text-3xl md:text-4xl font-bold animate-sunrise ${isHindi ? 'font-hindi' : ''}`}>
+          {t('about_hero_title')}
         </h1>
-        <p className="text-primary-foreground/80 mt-2 font-hindi">
-          Soil to Sales
+        <p className="text-primary-foreground/80 mt-2">
+          {t('about_hero_subtitle')}
         </p>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto">
-        {/* Mission Statement */}
-        <div className="text-center py-8">
-          <p className="text-xl font-hindi text-foreground leading-relaxed">
-            हम किसानों को <span className="text-primary font-semibold">AI की ताकत</span> देते हैं —
-            <br />
-            ताकि वे अपनी मिट्टी समझें, फसल बचाएं, और सही दाम पाएं।
+      <main className="px-4 max-w-3xl mx-auto">
+        {/* Product Section */}
+        <section className="py-10">
+          <h2 className={`text-2xl font-bold text-center mb-4 ${isHindi ? 'font-hindi' : ''}`}>
+            {t('about_product_title')}
+          </h2>
+          <p className={`text-center text-muted-foreground leading-relaxed ${isHindi ? 'font-hindi' : ''}`}>
+            {t('about_product_desc')}
           </p>
-        </div>
+          
+          <div className="grid md:grid-cols-3 gap-4 mt-8">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={index} className="border-0 shadow-soft text-center">
+                  <CardContent className="p-5">
+                    <Icon className="w-10 h-10 text-primary mx-auto mb-3" />
+                    <h3 className={`font-semibold mb-1 ${isHindi ? 'font-hindi' : ''}`}>{feature.title}</h3>
+                    <p className={`text-sm text-muted-foreground ${isHindi ? 'font-hindi' : ''}`}>{feature.desc}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Mission Statement */}
+        <section className="py-8 bg-muted/30 -mx-4 px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className={`text-2xl font-bold mb-4 ${isHindi ? 'font-hindi' : ''}`}>
+              {t('about_mission_title')}
+            </h2>
+            <p className={`text-xl leading-relaxed ${isHindi ? 'font-hindi' : ''}`}>
+              {t('about_mission_desc')}
+            </p>
+          </div>
+        </section>
 
         {/* Three Pillars */}
-        <div className="space-y-4 mt-6">
-          {pillars.map((pillar, index) => (
-            <div
-              key={index}
-              className={`${pillar.color} rounded-xl p-5 animate-slide-up`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0">{pillar.icon}</div>
-                <div>
-                  <h3 className="text-lg font-semibold font-hindi">{pillar.title}</h3>
-                  <p className="text-sm opacity-80 font-hindi">{pillar.description}</p>
+        <section className="py-10">
+          <h2 className={`text-xl font-semibold text-center mb-6 ${isHindi ? 'font-hindi' : ''}`}>
+            {isHindi ? "हमारे तीन स्तंभ" : "Our Three Pillars"}
+          </h2>
+          <div className="space-y-4">
+            {pillars.map((pillar, index) => (
+              <div
+                key={index}
+                className={`${pillar.color} rounded-xl p-5 animate-slide-up`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0">{pillar.icon}</div>
+                  <div>
+                    <h3 className={`text-lg font-semibold ${isHindi ? 'font-hindi' : ''}`}>{pillar.title}</h3>
+                    <p className={`text-sm opacity-80 ${isHindi ? 'font-hindi' : ''}`}>{pillar.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* How it works */}
-        <div className="mt-10 text-center">
-          <h2 className="text-lg font-semibold font-hindi mb-4">कैसे काम करता है?</h2>
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground font-hindi flex-wrap">
-            <span className="bg-muted px-3 py-1 rounded-full">फ़ोटो लो</span>
-            <ArrowRight className="w-4 h-4" />
-            <span className="bg-muted px-3 py-1 rounded-full">AI जांचे</span>
-            <ArrowRight className="w-4 h-4" />
-            <span className="bg-muted px-3 py-1 rounded-full">सलाह पाओ</span>
-            <ArrowRight className="w-4 h-4" />
-            <span className="bg-primary/10 text-primary px-3 py-1 rounded-full">कमाई बढ़ाओ</span>
+            ))}
           </div>
-        </div>
+        </section>
+
+        {/* Company Section */}
+        <section className="py-8">
+          <h2 className={`text-2xl font-bold text-center mb-4 ${isHindi ? 'font-hindi' : ''}`}>
+            {t('about_company_title')}
+          </h2>
+          <p className={`text-center text-muted-foreground leading-relaxed ${isHindi ? 'font-hindi' : ''}`}>
+            {t('about_company_desc')}
+          </p>
+        </section>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-10">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">10,000+</p>
-            <p className="text-xs text-muted-foreground font-hindi">जांचें हुईं</p>
+        <section className="py-8">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">10,000+</p>
+              <p className={`text-xs text-muted-foreground ${isHindi ? 'font-hindi' : ''}`}>{t('stat_scans')}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-success">85%</p>
+              <p className={`text-xs text-muted-foreground ${isHindi ? 'font-hindi' : ''}`}>{t('stat_accuracy')}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-accent">₹0</p>
+              <p className={`text-xs text-muted-foreground ${isHindi ? 'font-hindi' : ''}`}>{t('stat_free')}</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-success">85%</p>
-            <p className="text-xs text-muted-foreground font-hindi">सटीकता</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-accent">₹0</p>
-            <p className="text-xs text-muted-foreground font-hindi">पहली जांच</p>
-          </div>
-        </div>
+        </section>
 
         {/* CTA */}
-        <div className="mt-10 text-center">
+        <section className="py-8 text-center">
           <Link to="/">
-            <Button size="lg" className="font-hindi text-lg w-full max-w-xs">
-              अभी जांच करें
+            <Button size="lg" className={`text-lg w-full max-w-xs ${isHindi ? 'font-hindi' : ''}`}>
+              {t('start_now')}
             </Button>
           </Link>
-        </div>
-
-        {/* Back link */}
-        <div className="text-center mt-6">
-          <Link to="/" className="text-muted-foreground font-hindi text-sm hover:text-primary flex items-center justify-center gap-1">
-            <ChevronLeft className="w-4 h-4" />
-            वापस जाएं
+        </section>
+        
+        {/* Cross-navigation */}
+        <section className="py-6 flex flex-wrap justify-center gap-4 text-sm border-t border-border">
+          <Link to="/how-it-works" className={`text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors ${isHindi ? 'font-hindi' : ''}`}>
+            {t('nav_how_it_works')}
+            <ArrowRight className="w-3 h-3" />
           </Link>
-        </div>
+          <span className="text-border">•</span>
+          <Link to="/pricing" className={`text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors ${isHindi ? 'font-hindi' : ''}`}>
+            {t('nav_pricing')}
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+          <span className="text-border">•</span>
+          <Link to="/career" className={`text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors ${isHindi ? 'font-hindi' : ''}`}>
+            {t('nav_career')}
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </section>
       </main>
     </div>
   );

@@ -1,14 +1,31 @@
 import { Link, useLocation } from "react-router-dom";
-import { Scan, History, HelpCircle } from "lucide-react";
+import { Scan, History, HelpCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const DesktopNav = () => {
   const location = useLocation();
+  const { t, isHindi } = useLanguage();
 
   const navItems = [
-    { path: "/", label: "जांच", icon: Scan },
-    { path: "/history", label: "इतिहास", icon: History },
-    { path: "/help", label: "मदद", icon: HelpCircle },
+    { path: "/", label: t('nav_scan'), icon: Scan },
+    { path: "/history", label: t('nav_history'), icon: History },
+    { path: "/help", label: t('nav_help'), icon: HelpCircle },
+  ];
+
+  const moreItems = [
+    { path: "/about", label: t('nav_about') },
+    { path: "/how-it-works", label: t('nav_how_it_works') },
+    { path: "/pricing", label: t('nav_pricing') },
+    { path: "/career", label: t('nav_career') },
+    { path: "/vision", label: t('nav_vision') },
+    { path: "/partners", label: t('nav_partners') },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -18,7 +35,7 @@ const DesktopNav = () => {
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2">
         <span className="text-2xl">🌱</span>
-        <span className="text-xl font-bold text-primary font-hindi">DataKhet</span>
+        <span className="text-xl font-bold text-primary">DataKhet</span>
       </Link>
 
       {/* Nav links */}
@@ -29,7 +46,7 @@ const DesktopNav = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-hindi transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isHindi ? 'font-hindi' : ''} transition-colors ${
                 isActive(item.path)
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -40,12 +57,31 @@ const DesktopNav = () => {
             </Link>
           );
         })}
+        
+        {/* More dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className={`flex items-center gap-1 px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ${isHindi ? 'font-hindi' : ''}`}>
+              {t('nav_more')}
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {moreItems.map((item) => (
+              <DropdownMenuItem key={item.path} asChild>
+                <Link to={item.path} className={`w-full ${isHindi ? 'font-hindi' : ''}`}>
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Subscribe CTA */}
       <Link to="/subscribe">
-        <Button className="font-hindi bg-primary hover:bg-primary-hover">
-          सदस्यता लें
+        <Button className={`bg-primary hover:bg-primary-hover ${isHindi ? 'font-hindi' : ''}`}>
+          {t('nav_subscribe')}
         </Button>
       </Link>
     </nav>
