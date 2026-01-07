@@ -1,225 +1,143 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Camera, Smartphone, MapPin } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Smartphone, ChevronLeft, ArrowRight } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
 
 const Onboard = () => {
-  const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
     mobile: "",
-    crop: "",
-    farmSize: "",
     region: "",
-    language: "",
-    whatsappTips: false
+    whatsappTips: true,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Welcome to DataKhet! 🌱",
-      description: "We'll contact you within 24 hours to get you started.",
-    });
+    
+    // Save to localStorage
+    localStorage.setItem("datakhet_user", JSON.stringify(formData));
+    
+    toast.success("स्वागत है! 🌱");
+    navigate("/");
   };
 
-  const crops = [
-    "Rice", "Wheat", "Corn", "Tomatoes", "Potatoes", "Onions", 
-    "Cotton", "Sugarcane", "Soybeans", "Coffee", "Tea", "Other"
-  ];
-
-  const languages = [
-    "English", "Hindi", "Tamil", "Telugu", "Bengali", "Marathi", 
-    "Gujarati", "Kannada", "Malayalam", "Punjabi", "Urdu", "Other"
-  ];
-
   const regions = [
-    "Punjab", "Haryana", "Uttar Pradesh", "Madhya Pradesh", "Maharashtra", 
-    "Karnataka", "Tamil Nadu", "Andhra Pradesh", "West Bengal", "Bihar", "Other"
+    { value: "up", label: "उत्तर प्रदेश" },
+    { value: "punjab", label: "पंजाब" },
+    { value: "haryana", label: "हरियाणा" },
+    { value: "mp", label: "मध्य प्रदेश" },
+    { value: "maharashtra", label: "महाराष्ट्र" },
+    { value: "rajasthan", label: "राजस्थान" },
+    { value: "bihar", label: "बिहार" },
+    { value: "gujarat", label: "गुजरात" },
+    { value: "other", label: "अन्य" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-subtle py-20">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Join the Farming Revolution
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Get started with AI-powered farming in just 2 minutes
-            </p>
+    <div className="min-h-screen bg-background pb-24">
+      {/* Header */}
+      <header className="bg-gradient-earth text-primary-foreground p-6 text-center">
+        <h1 className="text-2xl font-bold font-hindi animate-sunrise">
+          DataKhet में आपका स्वागत है
+        </h1>
+        <p className="text-primary-foreground/80 mt-1 text-sm font-hindi">
+          बस 30 सेकंड में शुरू करें
+        </p>
+      </header>
+
+      <main className="p-4 max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          {/* Mobile */}
+          <div>
+            <label className="text-sm font-hindi text-foreground font-medium">
+              मोबाइल नंबर *
+            </label>
+            <Input
+              type="tel"
+              placeholder="9876543210"
+              value={formData.mobile}
+              onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+              required
+              className="mt-1 font-hindi text-lg"
+            />
           </div>
 
-          <Card className="border-0 shadow-earth">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl text-foreground">Farmer Registration</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="name" className="text-foreground font-semibold">
-                      Full Name *
-                    </Label>
-                    <Input 
-                      id="name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      required
-                      className="mt-2"
-                    />
-                  </div>
+          {/* Region */}
+          <div>
+            <label className="text-sm font-hindi text-foreground font-medium">
+              राज्य *
+            </label>
+            <Select onValueChange={(value) => setFormData({ ...formData, region: value })}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="अपना राज्य चुनें" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover">
+                {regions.map((region) => (
+                  <SelectItem key={region.value} value={region.value} className="font-hindi">
+                    {region.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-                  <div>
-                    <Label htmlFor="mobile" className="text-foreground font-semibold">
-                      Mobile Number *
-                    </Label>
-                    <Input 
-                      id="mobile"
-                      type="tel"
-                      placeholder="+91 9876543210"
-                      value={formData.mobile}
-                      onChange={(e) => setFormData({...formData, mobile: e.target.value})}
-                      required
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
+          {/* WhatsApp opt-in */}
+          <div className="flex items-center space-x-3 bg-muted/50 rounded-lg p-4">
+            <Checkbox
+              id="whatsapp"
+              checked={formData.whatsappTips}
+              onCheckedChange={(checked) => setFormData({ ...formData, whatsappTips: checked as boolean })}
+            />
+            <label htmlFor="whatsapp" className="text-sm font-hindi flex items-center gap-2 cursor-pointer">
+              <Smartphone className="h-4 w-4 text-success" />
+              WhatsApp पर रोज़ खेती की टिप्स भेजें
+            </label>
+          </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="crop" className="text-foreground font-semibold">
-                      Primary Crop *
-                    </Label>
-                    <Select onValueChange={(value) => setFormData({...formData, crop: value})}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select your main crop" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover">
-                        {crops.map((crop) => (
-                          <SelectItem key={crop} value={crop}>{crop}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <Button type="submit" size="lg" className="w-full font-hindi text-lg">
+            शुरू करें
+            <ArrowRight className="w-5 h-5 ml-2" />
+          </Button>
+        </form>
 
-                  <div>
-                    <Label htmlFor="farmSize" className="text-foreground font-semibold">
-                      Farm Size (Acres) *
-                    </Label>
-                    <Input 
-                      id="farmSize"
-                      type="number"
-                      placeholder="e.g. 5"
-                      value={formData.farmSize}
-                      onChange={(e) => setFormData({...formData, farmSize: e.target.value})}
-                      required
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
+        {/* Skip option */}
+        <div className="text-center mt-6">
+          <Link to="/" className="text-muted-foreground font-hindi text-sm hover:text-primary">
+            बाद में करें, पहले जांच करें →
+          </Link>
+        </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="region" className="text-foreground font-semibold">
-                      Region/State *
-                    </Label>
-                    <Select onValueChange={(value) => setFormData({...formData, region: value})}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select your state" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover">
-                        {regions.map((region) => (
-                          <SelectItem key={region} value={region}>{region}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="language" className="text-foreground font-semibold">
-                      Preferred Language *
-                    </Label>
-                    <Select onValueChange={(value) => setFormData({...formData, language: value})}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Choose language" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover">
-                        {languages.map((language) => (
-                          <SelectItem key={language} value={language}>{language}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="whatsapp"
-                    checked={formData.whatsappTips}
-                    onCheckedChange={(checked) => setFormData({...formData, whatsappTips: checked as boolean})}
-                  />
-                  <Label htmlFor="whatsapp" className="text-sm text-foreground flex items-center gap-2">
-                    <Smartphone className="h-4 w-4" />
-                    Send daily farming tips on WhatsApp
-                  </Label>
-                </div>
-
-                <div className="border-t border-border pt-6">
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Camera className="h-6 w-6 text-accent" />
-                      <div>
-                        <p className="font-semibold text-foreground">Optional: Soil Analysis</p>
-                        <p className="text-sm text-muted-foreground">Scan your soil with mobile camera</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" type="button">
-                      Scan Soil
-                    </Button>
-                  </div>
-                </div>
-
-                <Button type="submit" size="lg" className="w-full text-lg py-6">
-                  <MapPin className="mr-2 h-5 w-5" />
-                  Start My Farming Journey
-                </Button>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  By registering, you agree to receive farming tips and updates. 
-                  We respect your privacy and never share your data.
-                </p>
-              </form>
-            </CardContent>
-          </Card>
-
-          <div className="mt-12 text-center">
-            <h3 className="text-xl font-semibold text-foreground mb-4">What happens next?</h3>
-            <div className="grid md:grid-cols-3 gap-6 text-sm text-muted-foreground">
-              <div>
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">1</div>
-                We'll call you within 24 hours
-              </div>
-              <div>
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">2</div>
-                Schedule sensor installation
-              </div>
-              <div>
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">3</div>
-                Start receiving AI recommendations
-              </div>
+        {/* What happens next */}
+        <div className="mt-10 bg-muted/30 rounded-xl p-4">
+          <h3 className="font-semibold font-hindi text-center mb-4">आगे क्या होगा?</h3>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</div>
+              <p className="text-sm font-hindi">मिट्टी/फसल की फ़ोटो लें</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">2</div>
+              <p className="text-sm font-hindi">AI तुरंत जांच करेगा</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</div>
+              <p className="text-sm font-hindi">सलाह आवाज़ में सुनें</p>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Back link */}
+        <div className="text-center mt-6">
+          <Link to="/" className="text-muted-foreground font-hindi text-sm hover:text-primary flex items-center justify-center gap-1">
+            <ChevronLeft className="w-4 h-4" />
+            वापस जाएं
+          </Link>
+        </div>
+      </main>
     </div>
   );
 };

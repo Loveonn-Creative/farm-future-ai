@@ -17,14 +17,17 @@ export type Database = {
       soil_scans: {
         Row: {
           analysis_summary: string | null
+          area_bigha: number | null
           comparison_note: string | null
           confidence_score: number | null
           created_at: string
           crop_type: string | null
           extracted_text: string | null
+          gps_coordinates: Json | null
           id: string
           image_url: string | null
           insights: Json | null
+          land_category: string | null
           language: string | null
           latitude: number | null
           longitude: number | null
@@ -33,6 +36,7 @@ export type Database = {
           organic_matter_percentage: number | null
           ph_level: number | null
           phosphorus_level: string | null
+          plot_name: string | null
           potassium_level: string | null
           precision_level: string | null
           raw_response: Json | null
@@ -44,14 +48,17 @@ export type Database = {
         }
         Insert: {
           analysis_summary?: string | null
+          area_bigha?: number | null
           comparison_note?: string | null
           confidence_score?: number | null
           created_at?: string
           crop_type?: string | null
           extracted_text?: string | null
+          gps_coordinates?: Json | null
           id?: string
           image_url?: string | null
           insights?: Json | null
+          land_category?: string | null
           language?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -60,6 +67,7 @@ export type Database = {
           organic_matter_percentage?: number | null
           ph_level?: number | null
           phosphorus_level?: string | null
+          plot_name?: string | null
           potassium_level?: string | null
           precision_level?: string | null
           raw_response?: Json | null
@@ -71,14 +79,17 @@ export type Database = {
         }
         Update: {
           analysis_summary?: string | null
+          area_bigha?: number | null
           comparison_note?: string | null
           confidence_score?: number | null
           created_at?: string
           crop_type?: string | null
           extracted_text?: string | null
+          gps_coordinates?: Json | null
           id?: string
           image_url?: string | null
           insights?: Json | null
+          land_category?: string | null
           language?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -87,6 +98,7 @@ export type Database = {
           organic_matter_percentage?: number | null
           ph_level?: number | null
           phosphorus_level?: string | null
+          plot_name?: string | null
           potassium_level?: string | null
           precision_level?: string | null
           raw_response?: Json | null

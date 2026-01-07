@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Camera, Upload, Loader2, Sprout, Wheat, Flower2 } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Camera, Upload, Loader2, Sprout, Wheat, Flower2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DesktopNav from "@/components/DesktopNav";
@@ -349,8 +349,14 @@ const Home = () => {
           </button>
         </div>
 
+        {/* Land Mapping Link */}
+        <Link to="/land-mapping" className="mt-6 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors font-hindi text-sm">
+          <MapPin className="w-4 h-4" />
+          खेत का नक्शा बनाएं
+        </Link>
+
         {/* Helper text for desktop */}
-        <p className="hidden md:block mt-8 text-sm text-muted-foreground font-hindi">
+        <p className="hidden md:block mt-4 text-sm text-muted-foreground font-hindi">
           फ़ोटो अपलोड करें या कैमरा खोलें
         </p>
       </main>
