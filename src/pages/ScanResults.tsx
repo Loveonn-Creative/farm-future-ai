@@ -71,14 +71,25 @@ interface AnalysisData {
   region_advice?: string;
 }
 
-// Expandable section states
+const ScanResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { analysis, category } = (location.state as { analysis: AnalysisData; category: string }) || {};
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    freeRemedies: true,
+    paidRemedies: false,
+    insights: false,
+    crops: false,
+    details: false,
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   // Generate speech text from insights
   const generateSpeechText = (): string => {
