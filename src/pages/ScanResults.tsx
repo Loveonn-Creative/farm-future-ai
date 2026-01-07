@@ -1,9 +1,10 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2, Sprout, Wheat, Leaf, Pill, Lightbulb, ScrollText, Flower2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info, ArrowRight, IndianRupee, Volume2, Share2, Loader2, Sprout, Wheat, Leaf, Pill, Lightbulb, ScrollText, Flower2, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 import VoiceQuestion from "@/components/VoiceQuestion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Insight {
   type: "success" | "warning" | "info";
@@ -66,9 +67,11 @@ interface AnalysisData {
     paid_remedies?: ControlStep[];
   };
   stage_warning?: string;
+  land_category?: string;
+  region_advice?: string;
 }
 
-const ScanResults = () => {
+// Expandable section states
   const location = useLocation();
   const navigate = useNavigate();
   const { analysis, category } = (location.state as { analysis: AnalysisData; category: string }) || {};
@@ -404,6 +407,17 @@ const ScanResults = () => {
           </div>
         )}
 
+        {/* Land Category Badge */}
+        {analysis.land_category && (
+          <div className="bg-earth-brown/10 rounded-xl p-3 flex items-center gap-2 animate-slide-up">
+            <MapPin className="w-4 h-4 text-earth-brown" />
+            <span className="font-hindi text-sm text-earth-brown font-medium">{analysis.land_category}</span>
+            {analysis.region_advice && (
+              <span className="text-xs text-muted-foreground font-hindi">• {analysis.region_advice}</span>
+            )}
+          </div>
+        )}
+
         {/* Stage Warning */}
         {analysis.stage_warning && (
           <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 animate-slide-up">
@@ -468,116 +482,169 @@ const ScanResults = () => {
           </div>
         )}
 
-        {/* Control Steps - Free Remedies First */}
+        {/* Control Steps - Free Remedies First (Collapsible) */}
         {analysis.control_steps?.free_remedies && analysis.control_steps.free_remedies.length > 0 && (
-          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
-              <Leaf className="w-5 h-5 text-success animate-grow" /> मुफ्त/घरेलू उपाय
-            </h2>
-            <div className="space-y-3">
-              {analysis.control_steps.free_remedies.map((step, index) => (
-                <div key={index} className="bg-success/5 border border-success/20 rounded-xl p-4">
-                  <p className="font-semibold font-hindi text-foreground">{step.remedy}</p>
-                  {step.how_to_make && (
-                    <p className="text-sm text-muted-foreground font-hindi mt-1">
-                      <span className="text-success">बनाएं:</span> {step.how_to_make}
-                    </p>
-                  )}
-                  {step.how_to_apply && (
-                    <p className="text-sm text-muted-foreground font-hindi mt-1">
-                      <span className="text-success">लगाएं:</span> {step.how_to_apply}
-                    </p>
-                  )}
-                  {step.frequency && (
-                    <p className="text-sm text-muted-foreground font-hindi mt-1">
-                      <span className="text-success">कितनी बार:</span> {step.frequency}
-                    </p>
-                  )}
+          <Collapsible open={expandedSections.freeRemedies} onOpenChange={() => toggleSection("freeRemedies")}>
+            <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-semibold font-hindi flex items-center gap-2">
+                    <Leaf className="w-5 h-5 text-success animate-grow" /> मुफ्त/घरेलू उपाय
+                  </h2>
+                  {expandedSections.freeRemedies ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Control Steps - Paid Remedies */}
-        {analysis.control_steps?.paid_remedies && analysis.control_steps.paid_remedies.length > 0 && (
-          <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
-              <Pill className="w-5 h-5 text-primary animate-pulse-gentle" /> दवाई (अगर घरेलू उपाय से फायदा न हो)
-            </h2>
-            <div className="space-y-3">
-              {analysis.control_steps.paid_remedies.map((step, index) => (
-                <div key={index} className="bg-muted/50 border border-border rounded-xl p-4">
-                  <div className="flex items-start justify-between">
-                    <p className="font-semibold font-hindi text-foreground">{step.medicine}</p>
-                    {step.cost && (
-                      <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{step.cost}</span>
-                    )}
-                  </div>
-                  {step.dosage && (
-                    <p className="text-sm text-muted-foreground font-hindi mt-1">
-                      <span className="text-primary">मात्रा:</span> {step.dosage}
-                    </p>
-                  )}
-                  {step.timing && (
-                    <p className="text-sm text-muted-foreground font-hindi mt-1">
-                      <span className="text-primary">समय:</span> {step.timing}
-                    </p>
-                  )}
-                  {step.when_needed && (
-                    <p className="text-xs text-muted-foreground font-hindi mt-2 italic">
-                      {step.when_needed}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Other insights - Simpler cards */}
-        {insights.length > 1 && (
-          <div className="space-y-3">
-            {insights.slice(1).map((insight, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-4 bg-card rounded-xl shadow-soft animate-slide-up"
-                style={{ animationDelay: `${(index + 1) * 0.08}s` }}
-              >
-                {getInsightIcon(insight.type)}
-                <div className="flex-1">
-                  <p className="font-hindi text-foreground font-medium">{insight.text}</p>
-                  {insight.action && (
-                    <p className="text-sm text-primary font-hindi mt-1">
-                      → {insight.action}
-                    </p>
-                  )}
-                  {insight.details && (
-                    <p className="text-xs text-muted-foreground font-hindi mt-1">
-                      {insight.details}
-                    </p>
-                  )}
-                </div>
+              </CollapsibleTrigger>
+              
+              {/* Always show first remedy */}
+              <div className="bg-success/5 border border-success/20 rounded-xl p-4">
+                <p className="font-semibold font-hindi text-foreground">{analysis.control_steps.free_remedies[0].remedy}</p>
+                {analysis.control_steps.free_remedies[0].how_to_apply && (
+                  <p className="text-sm text-muted-foreground font-hindi mt-1">
+                    <span className="text-success">लगाएं:</span> {analysis.control_steps.free_remedies[0].how_to_apply}
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
+
+              <CollapsibleContent>
+                <div className="space-y-3 mt-3">
+                  {analysis.control_steps.free_remedies.slice(1).map((step, index) => (
+                    <div key={index} className="bg-success/5 border border-success/20 rounded-xl p-4">
+                      <p className="font-semibold font-hindi text-foreground">{step.remedy}</p>
+                      {step.how_to_make && (
+                        <p className="text-sm text-muted-foreground font-hindi mt-1">
+                          <span className="text-success">बनाएं:</span> {step.how_to_make}
+                        </p>
+                      )}
+                      {step.how_to_apply && (
+                        <p className="text-sm text-muted-foreground font-hindi mt-1">
+                          <span className="text-success">लगाएं:</span> {step.how_to_apply}
+                        </p>
+                      )}
+                      {step.frequency && (
+                        <p className="text-sm text-muted-foreground font-hindi mt-1">
+                          <span className="text-success">कितनी बार:</span> {step.frequency}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+              
+              {analysis.control_steps.free_remedies.length > 1 && !expandedSections.freeRemedies && (
+                <button onClick={() => toggleSection("freeRemedies")} className="text-sm text-success font-hindi mt-2 flex items-center gap-1">
+                  +{analysis.control_steps.free_remedies.length - 1} और उपाय देखें <ChevronDown className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </Collapsible>
         )}
 
-        {/* Crop recommendations if available */}
-        {analysis.crop_recommendations && analysis.crop_recommendations.length > 0 && (
-          <div className="mt-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <h2 className="text-lg font-semibold font-hindi mb-3 flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-warning animate-glow" /> इस मिट्टी के लिए सही फसल
-            </h2>
-            <div className="space-y-2">
-              {analysis.crop_recommendations.slice(0, 3).map((rec, index) => (
-                <div key={index} className="bg-accent/10 rounded-lg p-3 border border-accent/20">
-                  <span className="font-semibold font-hindi text-foreground">{rec.crop}</span>
-                  <span className="text-muted-foreground font-hindi"> — {rec.reason}</span>
+        {/* Control Steps - Paid Remedies (Collapsible) */}
+        {analysis.control_steps?.paid_remedies && analysis.control_steps.paid_remedies.length > 0 && (
+          <Collapsible open={expandedSections.paidRemedies} onOpenChange={() => toggleSection("paidRemedies")}>
+            <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between mb-3 p-3 bg-muted/30 rounded-lg">
+                  <h2 className="text-base font-semibold font-hindi flex items-center gap-2">
+                    <Pill className="w-4 h-4 text-primary" /> दवाई (अगर घरेलू उपाय से फायदा न हो)
+                  </h2>
+                  {expandedSections.paidRemedies ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </div>
-              ))}
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent>
+                <div className="space-y-3">
+                  {analysis.control_steps.paid_remedies.map((step, index) => (
+                    <div key={index} className="bg-muted/50 border border-border rounded-xl p-4">
+                      <div className="flex items-start justify-between">
+                        <p className="font-semibold font-hindi text-foreground">{step.medicine}</p>
+                        {step.cost && (
+                          <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{step.cost}</span>
+                        )}
+                      </div>
+                      {step.dosage && (
+                        <p className="text-sm text-muted-foreground font-hindi mt-1">
+                          <span className="text-primary">मात्रा:</span> {step.dosage}
+                        </p>
+                      )}
+                      {step.timing && (
+                        <p className="text-sm text-muted-foreground font-hindi mt-1">
+                          <span className="text-primary">समय:</span> {step.timing}
+                        </p>
+                      )}
+                      {step.when_needed && (
+                        <p className="text-xs text-muted-foreground font-hindi mt-2 italic">
+                          {step.when_needed}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
             </div>
-          </div>
+          </Collapsible>
+        )}
+
+        {/* Other insights - Collapsible */}
+        {insights.length > 1 && (
+          <Collapsible open={expandedSections.insights} onOpenChange={() => toggleSection("insights")}>
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span className="text-sm font-hindi text-muted-foreground">+{insights.length - 1} और जानकारी</span>
+                {expandedSections.insights ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-3 mt-3">
+                {insights.slice(1).map((insight, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-4 bg-card rounded-xl shadow-soft animate-slide-up"
+                    style={{ animationDelay: `${(index + 1) * 0.08}s` }}
+                  >
+                    {getInsightIcon(insight.type)}
+                    <div className="flex-1">
+                      <p className="font-hindi text-foreground font-medium">{insight.text}</p>
+                      {insight.action && (
+                        <p className="text-sm text-primary font-hindi mt-1">
+                          → {insight.action}
+                        </p>
+                      )}
+                      {insight.details && (
+                        <p className="text-xs text-muted-foreground font-hindi mt-1">
+                          {insight.details}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Crop recommendations - Collapsible */}
+        {analysis.crop_recommendations && analysis.crop_recommendations.length > 0 && (
+          <Collapsible open={expandedSections.crops} onOpenChange={() => toggleSection("crops")}>
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg mt-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                <h2 className="text-base font-semibold font-hindi flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4 text-warning" /> इस मिट्टी के लिए सही फसल
+                </h2>
+                {expandedSections.crops ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-2 mt-3">
+                {analysis.crop_recommendations.slice(0, 3).map((rec, index) => (
+                  <div key={index} className="bg-accent/10 rounded-lg p-3 border border-accent/20">
+                    <span className="font-semibold font-hindi text-foreground">{rec.crop}</span>
+                    <span className="text-muted-foreground font-hindi"> — {rec.reason}</span>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
 
         {/* Voice Q&A Section */}
