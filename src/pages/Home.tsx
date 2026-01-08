@@ -4,6 +4,7 @@ import { Camera, Upload, Loader2, Sprout, Wheat, Flower2, MapPin } from "lucide-
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DesktopNav from "@/components/DesktopNav";
+import MobileMenu from "@/components/MobileMenu";
 
 type ScanCategory = "soil" | "crop" | "kitchen";
 
@@ -270,6 +271,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Mobile Menu */}
+      <MobileMenu />
+      
       {/* Desktop Navigation */}
       <DesktopNav />
 
@@ -284,7 +288,7 @@ const Home = () => {
       />
 
       {/* Main content - centered */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20 md:pb-8">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20 md:pb-8 pt-16 md:pt-0">
         {/* Single powerful headline */}
         <h1 className="text-2xl md:text-3xl font-bold text-foreground text-center font-hindi animate-sunrise mb-12 leading-relaxed">
           मिट्टी देखो। फसल जानो।<br />
