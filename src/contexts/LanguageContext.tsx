@@ -25,6 +25,7 @@ const translations: Translations = {
   nav_vision: { hi: 'हमारा विज़न', en: 'Our Vision' },
   nav_partners: { hi: 'साझेदार', en: 'Partners' },
   nav_faq: { hi: 'सवाल-जवाब', en: 'FAQ' },
+  nav_features: { hi: 'विशेषताएं', en: 'Features' },
   
   // Common
   back: { hi: 'वापस जाएं', en: 'Go Back' },
