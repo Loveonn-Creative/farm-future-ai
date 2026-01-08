@@ -33,7 +33,40 @@ const translations: Translations = {
   start_now: { hi: 'अभी शुरू करें', en: 'Start Now' },
   contact_us: { hi: 'संपर्क करें', en: 'Contact Us' },
   
-  // About Page
+  // About Page - Enterprise Grade
+  about_hero_new: { hi: 'मिट्टी की समझ से सही दाम तक।', en: 'From soil intelligence to fair prices.' },
+  about_what_we_do: { hi: 'हम क्या करते हैं', en: 'What We Do' },
+  about_soil_line: { hi: 'मिट्टी का विश्लेषण। सही खाद की सलाह।', en: 'Soil analysis. Right fertilizer advice.' },
+  about_crop_line: { hi: 'फसल की बीमारी पहचानें। समय पर इलाज।', en: 'Identify crop disease. Treat in time.' },
+  about_market_line: { hi: 'बाज़ार से जुड़ें। उचित दाम पाएं।', en: 'Connect to markets. Get fair value.' },
+  about_how_title: { hi: 'कैसे काम करता है', en: 'How It Works' },
+  about_how_line: { hi: 'आप स्कैन करें। हम जांचें। आप फ़ैसला लें।', en: 'You scan. We analyze. You decide.' },
+  about_outcomes: { hi: 'तीन नतीजे', en: 'Three Outcomes' },
+  about_outcome1_title: { hi: 'स्वस्थ मिट्टी', en: 'Healthier soil' },
+  about_outcome1_desc: { hi: 'सही खाद, सही मात्रा — बर्बादी नहीं।', en: 'Right fertilizer, right amount — no waste.' },
+  about_outcome2_title: { hi: 'सुरक्षित फसल', en: 'Protected crops' },
+  about_outcome2_desc: { hi: 'बीमारी जल्दी पकड़ें, नुकसान रोकें।', en: 'Catch disease early, prevent loss.' },
+  about_outcome3_title: { hi: 'उचित दाम', en: 'Better prices' },
+  about_outcome3_desc: { hi: 'बिचौलियों के बिना बाज़ार तक पहुंच।', en: 'Market access without middlemen.' },
+  about_who_we_are: { hi: 'हम कौन हैं', en: 'Who We Are' },
+  about_company_line: { hi: 'भारत में बना। पंजाब, यूपी, महाराष्ट्र के किसान इस्तेमाल करते हैं।', en: 'Built in India. Used by farmers in Punjab, UP, Maharashtra.' },
+  about_cta: { hi: 'पहला स्कैन करें', en: 'Start your first scan' },
+  
+  // Career Page - Enterprise Grade
+  career_hero: { hi: 'किसान जो काम में लाएं, वो बनाओ।', en: 'Build tools farmers actually use.' },
+  career_the_work: { hi: 'काम कैसा होगा', en: 'The Work' },
+  career_work_line1: { hi: 'किसानों से बात करोगे।', en: "You'll talk to farmers." },
+  career_work_line2: { hi: 'कोड शिप करोगे।', en: "You'll ship code." },
+  career_work_line3: { hi: 'असर मापोगे।', en: "You'll measure impact." },
+  career_expectations: { hi: 'हमारी अपेक्षाएं', en: 'What We Expect' },
+  career_ownership: { hi: 'Ownership — काम नहीं, नतीजा तुम्हारा है।', en: 'Ownership — You own the outcome, not just the task.' },
+  career_field: { hi: 'Field Accountability — काम गांव में टेस्ट होता है, बोर्डरूम में नहीं।', en: 'Field Accountability — Work is tested in villages, not boardrooms.' },
+  career_execution: { hi: 'Execution — पहले शिप करो, फिर सुधारो।', en: 'Execution — Ship first, iterate after.' },
+  career_roles: { hi: 'खुले पद', en: 'Open Roles' },
+  career_apply: { hi: 'आवेदन करें', en: 'Apply' },
+  career_no_fit: { hi: 'कोई पद नहीं मिला?', en: 'No role fits?' },
+  
+  // Legacy keys (kept for backward compatibility)
   about_hero_title: { hi: 'मिट्टी से बाज़ार तक', en: 'From Soil to Market' },
   about_hero_subtitle: { hi: 'Soil to Sales', en: 'Soil to Sales' },
   about_product_title: { hi: 'DataKhet क्या है?', en: 'What is DataKhet?' },
@@ -51,16 +84,12 @@ const translations: Translations = {
     hi: 'भारत में बना, किसानों के लिए बना। हम एक टीम हैं जो तकनीक और खेती के बीच की खाई पाटने के लिए समर्पित है।', 
     en: 'Made in India, made for farmers. We are a team dedicated to bridging the gap between technology and farming.' 
   },
-  
-  // Pillars
   pillar_soil: { hi: 'मिट्टी देखभाल', en: 'Soil Care' },
   pillar_soil_desc: { hi: 'AI से मिट्टी जांचें, सही खाद डालें', en: 'Analyze soil with AI, apply the right fertilizer' },
   pillar_crop: { hi: 'फसल देखभाल', en: 'Crop Care' },
   pillar_crop_desc: { hi: 'बीमारी पहचानें, समय पर इलाज करें', en: 'Identify diseases, treat in time' },
   pillar_price: { hi: 'सही दाम', en: 'Fair Prices' },
   pillar_price_desc: { hi: 'बाज़ार से जुड़ें, उचित मूल्य पाएं', en: 'Connect to markets, get fair value' },
-  
-  // Career Page
   career_title: { hi: 'हमारे साथ जुड़ें', en: 'Join Our Team' },
   career_subtitle: { hi: 'भारत की खेती बदलने में हमारा साथ दें', en: 'Help us transform Indian agriculture' },
   career_culture_title: { hi: 'हमारी संस्कृति', en: 'Our Culture' },
@@ -70,7 +99,6 @@ const translations: Translations = {
   },
   career_why_join: { hi: 'क्यों जुड़ें?', en: 'Why Join Us?' },
   career_openings: { hi: 'वर्तमान पद', en: 'Current Openings' },
-  career_apply: { hi: 'आवेदन करें', en: 'Apply Now' },
   career_no_openings: { 
     hi: 'अभी कोई पद खुला नहीं है, लेकिन हम हमेशा प्रतिभाशाली लोगों की तलाश में रहते हैं।', 
     en: 'No openings right now, but we\'re always looking for talented people.' 

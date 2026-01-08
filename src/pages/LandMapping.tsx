@@ -240,17 +240,6 @@ const LandMapping = () => {
             </p>
           </div>
 
-          {/* Features */}
-          <div className="bg-muted/30 rounded-xl p-4 mb-6">
-            <h3 className="font-semibold font-hindi mb-3 text-sm">✨ विशेषताएं</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground font-hindi">
-              <li>• GPS + मोशन सेंसर + कंपास फ्यूज़न</li>
-              <li>• Kalman फ़िल्टर से शोर कमी</li>
-              <li>• वॉइस निर्देश (हिंदी/अंग्रेज़ी)</li>
-              <li>• ऑफ़लाइन सेव</li>
-            </ul>
-          </div>
-
           <div className="space-y-4">
             <div className="bg-muted/50 rounded-xl p-4 flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
