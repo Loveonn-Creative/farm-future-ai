@@ -220,11 +220,21 @@ const LandMapping = () => {
             </div>
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => setVoiceEnabled(!voiceEnabled)}
-              className="text-primary-foreground"
+              className="text-primary-foreground bg-white/10 hover:bg-white/20 gap-1.5"
             >
-              {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              {voiceEnabled ? (
+                <>
+                  <Volume2 className="w-4 h-4" />
+                  <span className="font-hindi text-xs">आवाज़ सुनें</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="w-4 h-4" />
+                  <span className="font-hindi text-xs">आवाज़ बंद</span>
+                </>
+              )}
             </Button>
           </div>
         </header>
@@ -292,11 +302,21 @@ const LandMapping = () => {
             </h1>
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => setVoiceEnabled(!voiceEnabled)}
-              className="text-primary-foreground"
+              className="text-primary-foreground bg-white/10 hover:bg-white/20 gap-1.5"
             >
-              {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              {voiceEnabled ? (
+                <>
+                  <Volume2 className="w-4 h-4" />
+                  <span className="font-hindi text-xs">आवाज़ सुनें</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="w-4 h-4" />
+                  <span className="font-hindi text-xs">आवाज़ बंद</span>
+                </>
+              )}
             </Button>
           </div>
         </header>
