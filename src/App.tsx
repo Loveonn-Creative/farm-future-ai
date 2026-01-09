@@ -20,6 +20,7 @@ import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import LandMapping from "./pages/LandMapping";
+import SavedPlots from "./pages/SavedPlots";
 import Career from "./pages/Career";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/faq" element={<FAQ />} />
               <Route path="/about" element={<About />} />
               <Route path="/land-mapping" element={<LandMapping />} />
+              <Route path="/saved-plots" element={<SavedPlots />} />
               <Route path="/career" element={<Career />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

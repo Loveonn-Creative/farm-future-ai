@@ -353,11 +353,17 @@ const Home = () => {
           </button>
         </div>
 
-        {/* Land Mapping Link */}
-        <Link to="/land-mapping" className="mt-6 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors font-hindi text-sm">
-          <MapPin className="w-4 h-4" />
-          खेत का नक्शा बनाएं
-        </Link>
+        {/* Land Mapping Links */}
+        <div className="mt-6 flex items-center justify-center gap-4 text-sm">
+          <Link to="/land-mapping" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors font-hindi">
+            <MapPin className="w-4 h-4" />
+            खेत नापें
+          </Link>
+          <span className="text-muted-foreground/30">|</span>
+          <Link to="/saved-plots" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors font-hindi">
+            मेरे खेत देखें
+          </Link>
+        </div>
 
         {/* Helper text for desktop */}
         <p className="hidden md:block mt-4 text-sm text-muted-foreground font-hindi">
