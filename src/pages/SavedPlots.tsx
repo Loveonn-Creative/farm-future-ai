@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ChevronLeft, Calendar, Ruler, Trash2, ImageIcon, ChevronRight } from "lucide-react";
+import { MapPin, ChevronLeft, Calendar, Ruler, Trash2, ImageIcon, ChevronRight, Wheat, Sprout, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -15,6 +15,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ScanRecord {
+  id: string;
+  created_at: string;
+  scan_category: string | null;
+  soil_type: string | null;
+  crop_type: string | null;
+  analysis_summary: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
 
 interface PlotData {
   id: string;
@@ -44,6 +56,8 @@ const SavedPlots = () => {
   const navigate = useNavigate();
   const [plots, setPlots] = useState<PlotData[]>([]);
   const [selectedPlot, setSelectedPlot] = useState<PlotData | null>(null);
+  const [plotScans, setPlotScans] = useState<ScanRecord[]>([]);
+  const [loadingScans, setLoadingScans] = useState(false);
 
   useEffect(() => {
     const savedPlots = JSON.parse(localStorage.getItem("datakhet_plots") || "[]");
@@ -51,6 +65,71 @@ const SavedPlots = () => {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     ));
   }, []);
+
+  // Check if a point is inside a polygon using ray casting
+  const isPointInPolygon = (lat: number, lng: number, corners: PlotData['corners']) => {
+    let inside = false;
+    const n = corners.length;
+    
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = corners[i].lat, yi = corners[i].lng;
+      const xj = corners[j].lat, yj = corners[j].lng;
+      
+      if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  };
+
+  // Fetch scans when a plot is selected
+  useEffect(() => {
+    if (!selectedPlot) {
+      setPlotScans([]);
+      return;
+    }
+
+    const fetchPlotScans = async () => {
+      setLoadingScans(true);
+      const sessionId = localStorage.getItem("datakhet_session");
+      
+      // Get bounding box of plot for initial filter
+      const lats = selectedPlot.corners.map(c => c.lat);
+      const lngs = selectedPlot.corners.map(c => c.lng);
+      const minLat = Math.min(...lats) - 0.001; // ~100m buffer
+      const maxLat = Math.max(...lats) + 0.001;
+      const minLng = Math.min(...lngs) - 0.001;
+      const maxLng = Math.max(...lngs) + 0.001;
+
+      const { data, error } = await supabase
+        .from("soil_scans")
+        .select("id, created_at, scan_category, soil_type, crop_type, analysis_summary, latitude, longitude")
+        .eq("session_id", sessionId)
+        .gte("latitude", minLat)
+        .lte("latitude", maxLat)
+        .gte("longitude", minLng)
+        .lte("longitude", maxLng)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error("Error fetching scans:", error);
+        setLoadingScans(false);
+        return;
+      }
+
+      // Filter to only scans actually inside the polygon
+      const scansInPlot = (data || []).filter(scan => 
+        scan.latitude && scan.longitude && 
+        isPointInPolygon(scan.latitude, scan.longitude, selectedPlot.corners)
+      );
+
+      setPlotScans(scansInPlot);
+      setLoadingScans(false);
+    };
+
+    fetchPlotScans();
+  }, [selectedPlot]);
 
   const deletePlot = (plotId: string) => {
     const updatedPlots = plots.filter(p => p.id !== plotId);
@@ -150,7 +229,74 @@ const SavedPlots = () => {
             </Card>
           )}
 
-          {/* Corner Coordinates */}
+          {/* Scan History for this Plot */}
+          <Card className="p-4">
+            <h2 className="font-semibold font-hindi mb-3 flex items-center gap-2">
+              <Wheat className="w-4 h-4 text-primary" />
+              इस खेत की जांच ({plotScans.length})
+            </h2>
+            
+            {loadingScans ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : plotScans.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground font-hindi mb-3">
+                  इस खेत में अभी कोई जांच नहीं हुई
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate("/")}
+                  className="font-hindi"
+                >
+                  <Sprout className="w-4 h-4 mr-1" />
+                  अभी जांचें
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {plotScans.map((scan) => (
+                  <div 
+                    key={scan.id}
+                    className="bg-muted/50 rounded-lg p-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {scan.scan_category === 'crop' ? (
+                          <Sprout className="w-4 h-4 text-success" />
+                        ) : (
+                          <Wheat className="w-4 h-4 text-amber-600" />
+                        )}
+                        <div>
+                          <p className="font-medium text-sm font-hindi">
+                            {scan.scan_category === 'crop' ? 'फसल जांच' : 'मिट्टी जांच'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDate(scan.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {scan.analysis_summary && (
+                      <p className="text-xs text-muted-foreground mt-2 font-hindi line-clamp-2">
+                        {scan.analysis_summary}
+                      </p>
+                    )}
+                    {(scan.soil_type || scan.crop_type) && (
+                      <p className="text-xs mt-1">
+                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded font-hindi">
+                          {scan.soil_type || scan.crop_type}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
           <Card className="p-4">
             <h2 className="font-semibold font-hindi mb-3">🗺️ कोने के निर्देशांक</h2>
             <div className="space-y-2">
