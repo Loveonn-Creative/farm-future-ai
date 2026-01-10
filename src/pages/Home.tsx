@@ -131,6 +131,15 @@ const Home = () => {
       const location = await getLocation();
       const language = detectLanguage();
       const sessionId = getSessionId();
+      
+      // Check for active plot context
+      const activePlotData = localStorage.getItem("datakhet_active_plot");
+      const activePlot = activePlotData ? JSON.parse(activePlotData) : null;
+      
+      // Clear active plot after reading
+      if (activePlot) {
+        localStorage.removeItem("datakhet_active_plot");
+      }
 
       const { data, error } = await supabase.functions.invoke("analyze-soil", {
         body: {
@@ -155,14 +164,18 @@ const Home = () => {
         return;
       }
 
+      // Use plot center location if available, otherwise use current GPS
+      const scanLat = activePlot?.center?.lat || location?.lat;
+      const scanLng = activePlot?.center?.lng || location?.lng;
+
       // Store scan result silently
       const { error: insertError } = await supabase.from("soil_scans").insert({
         session_id: sessionId,
         scan_type: "image",
         scan_category: scanCategory || "soil",
         language,
-        latitude: location?.lat,
-        longitude: location?.lng,
+        latitude: scanLat,
+        longitude: scanLng,
         image_url: imageBase64.substring(0, 100), // Store reference only
         soil_type: data.soil_type,
         ph_level: data.ph_level,
@@ -177,12 +190,19 @@ const Home = () => {
         recommendations: data.recommendations,
         insights: data.insights,
         crop_type: data.crop_type,
+        plot_name: activePlot?.name || null,
       });
 
       if (insertError) console.error("Failed to save scan:", insertError);
 
       // Navigate to results with data
-      navigate("/scan-results", { state: { analysis: data, category: scanCategory } });
+      navigate("/scan-results", { 
+        state: { 
+          analysis: data, 
+          category: scanCategory,
+          plotName: activePlot?.name 
+        } 
+      });
     } catch (error) {
       console.error("Analysis error:", error);
       toast({
