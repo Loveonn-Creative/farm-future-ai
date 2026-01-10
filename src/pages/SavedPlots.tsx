@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, ChevronLeft, Calendar, Ruler, Trash2, ImageIcon, ChevronRight, Wheat, Sprout, Loader2 } from "lucide-react";
+import { MapPin, ChevronLeft, Calendar, Ruler, Trash2, ImageIcon, ChevronRight, Wheat, Sprout, Loader2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -148,16 +148,60 @@ const SavedPlots = () => {
     });
   };
 
+  const shareViaWhatsApp = (plot: PlotData) => {
+    const cornersList = plot.corners
+      .map((c, i) => `कोना ${i + 1}: ${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}`)
+      .join('\n');
+    
+    const googleMapsLink = `https://www.google.com/maps/dir/${plot.corners.map(c => `${c.lat},${c.lng}`).join('/')}`;
+    
+    const message = `🌾 *${plot.name}*
+
+📐 *क्षेत्रफल:*
+• ${plot.area.bigha.toFixed(2)} बीघा
+• ${plot.area.acre.toFixed(2)} एकड़
+• ${plot.area.hectare.toFixed(3)} हेक्टेयर
+• ${plot.area.sqMeters.toFixed(0)} वर्ग मीटर
+
+📍 *माप की जानकारी:*
+• कोने: ${plot.corners.length}
+• सटीकता: ±${plot.precision.averageAccuracy.toFixed(1)}m
+• GPS पॉइंट्स: ${plot.precision.pointCount}
+• तारीख: ${formatDate(plot.createdAt)}
+
+🗺️ *निर्देशांक:*
+${cornersList}
+
+📍 *गूगल मैप्स पर देखें:*
+${googleMapsLink}
+
+_DataKhet से नापा गया_`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    toast.success("WhatsApp खुल रहा है...");
+  };
+
   // Plot detail view
   if (selectedPlot) {
     return (
       <div className="min-h-screen bg-background pb-24">
         <header className="bg-gradient-earth text-primary-foreground p-4">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setSelectedPlot(null)} className="text-primary-foreground">
-              <ChevronLeft className="w-5 h-5" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => setSelectedPlot(null)} className="text-primary-foreground">
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-xl font-bold font-hindi">{selectedPlot.name}</h1>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => shareViaWhatsApp(selectedPlot)}
+              className="text-primary-foreground"
+            >
+              <Share2 className="w-5 h-5" />
             </Button>
-            <h1 className="text-xl font-bold font-hindi">{selectedPlot.name}</h1>
           </div>
         </header>
 
@@ -310,6 +354,15 @@ const SavedPlots = () => {
               ))}
             </div>
           </Card>
+
+          {/* WhatsApp Share Button */}
+          <Button 
+            onClick={() => shareViaWhatsApp(selectedPlot)} 
+            className="w-full font-hindi bg-[#25D366] hover:bg-[#128C7E] text-white"
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            WhatsApp पर शेयर करें
+          </Button>
 
           {/* Delete Button */}
           <AlertDialog>
