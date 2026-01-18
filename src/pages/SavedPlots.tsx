@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import SoilHealthChart from "@/components/SoilHealthChart";
 
 interface ScanRecord {
   id: string;
@@ -526,6 +527,11 @@ _DataKhet से नापा गया_`;
                 ))}
               </div>
             </Card>
+          )}
+
+          {/* Soil Health Trend Chart */}
+          {plotScans.length >= 2 && (
+            <SoilHealthChart scans={plotScans} title="मिट्टी स्वास्थ्य ट्रेंड" />
           )}
 
           {/* Scan History for this Plot */}
