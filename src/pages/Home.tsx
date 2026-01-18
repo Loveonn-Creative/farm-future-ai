@@ -7,6 +7,7 @@ import { useOfflineSync } from "@/hooks/use-offline-sync";
 import DesktopNav from "@/components/DesktopNav";
 import MobileMenu from "@/components/MobileMenu";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import VoiceWalkthrough, { WalkthroughHelpButton } from "@/components/VoiceWalkthrough";
 
 type ScanCategory = "soil" | "crop" | "kitchen";
 
@@ -300,6 +301,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Voice Walkthrough for First-Time Users */}
+      <VoiceWalkthrough />
+      
       {/* Offline Indicator */}
       <OfflineIndicator />
       
@@ -333,6 +337,7 @@ const Home = () => {
           <button
             onClick={() => handleScanClick("soil")}
             disabled={isCapturing}
+            data-walkthrough="soil-scan"
             className="group relative aspect-square max-w-[160px] md:max-w-[180px] mx-auto w-full rounded-full bg-gradient-soil flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-soil-settle"
           >
             <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
@@ -351,6 +356,7 @@ const Home = () => {
           <button
             onClick={() => handleScanClick("crop")}
             disabled={isCapturing}
+            data-walkthrough="crop-scan"
             className="group relative aspect-square max-w-[160px] md:max-w-[180px] mx-auto w-full rounded-full bg-gradient-crop flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-leaf-pulse"
           >
             <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
@@ -369,6 +375,7 @@ const Home = () => {
           <button
             onClick={() => handleScanClick("kitchen")}
             disabled={isCapturing}
+            data-walkthrough="kitchen-garden"
             className="group relative aspect-square max-w-[160px] md:max-w-[180px] mx-auto w-full rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex flex-col items-center justify-center shadow-earth hover:shadow-glow transition-all duration-500 animate-sprout col-span-2 md:col-span-1"
           >
             <div className="absolute inset-2 rounded-full border-2 border-primary-foreground/20 group-hover:border-primary-foreground/40 transition-colors" />
@@ -387,7 +394,7 @@ const Home = () => {
 
         {/* Land Mapping Links */}
         <div className="mt-6 flex items-center justify-center gap-4 text-sm">
-          <Link to="/land-mapping" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors font-hindi">
+          <Link to="/land-mapping" data-walkthrough="land-mapping" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors font-hindi">
             <MapPin className="w-4 h-4" />
             खेत नापें
           </Link>
@@ -395,6 +402,12 @@ const Home = () => {
           <Link to="/saved-plots" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors font-hindi">
             मेरे खेत देखें
           </Link>
+        </div>
+
+        {/* Help button to replay walkthrough */}
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <WalkthroughHelpButton />
+          <span className="text-xs text-muted-foreground font-hindi">गाइड फिर से देखें</span>
         </div>
 
         {/* Helper text for desktop */}
