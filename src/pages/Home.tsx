@@ -3,8 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { Camera, Upload, Loader2, Sprout, Wheat, Flower2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOfflineSync } from "@/hooks/use-offline-sync";
 import DesktopNav from "@/components/DesktopNav";
 import MobileMenu from "@/components/MobileMenu";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 type ScanCategory = "soil" | "crop" | "kitchen";
 
@@ -19,6 +21,7 @@ const Home = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const { isOnline, saveScanLocally } = useOfflineSync();
 
   // Get or create session ID for anonymous tracking
   const getSessionId = () => {
@@ -168,8 +171,8 @@ const Home = () => {
       const scanLat = activePlot?.center?.lat || location?.lat;
       const scanLng = activePlot?.center?.lng || location?.lng;
 
-      // Store scan result silently
-      const { error: insertError } = await supabase.from("soil_scans").insert({
+      // Store scan result - offline or online
+      const scanData = {
         session_id: sessionId,
         scan_type: "image",
         scan_category: scanCategory || "soil",
@@ -191,9 +194,15 @@ const Home = () => {
         insights: data.insights,
         crop_type: data.crop_type,
         plot_name: activePlot?.name || null,
-      });
+      };
 
-      if (insertError) console.error("Failed to save scan:", insertError);
+      if (isOnline) {
+        const { error: insertError } = await supabase.from("soil_scans").insert([scanData]);
+        if (insertError) console.error("Failed to save scan:", insertError);
+      } else {
+        // Save locally when offline
+        saveScanLocally(scanData);
+      }
 
       // Navigate to results with data
       navigate("/scan-results", { 
@@ -291,6 +300,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Offline Indicator */}
+      <OfflineIndicator />
+      
       {/* Mobile Menu */}
       <MobileMenu />
       
