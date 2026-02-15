@@ -1,13 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
-import { ScanLine, ScrollText, Headphones } from "lucide-react";
+import { ScanLine, ScrollText, Headphones, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BottomNav = () => {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   const navItems = [
     { href: "/", label: "जांच", icon: ScanLine },
     { href: "/history", label: "इतिहास", icon: ScrollText },
     { href: "/help", label: "मदद", icon: Headphones },
+    ...(isAuthenticated
+      ? [{ href: "/profile", label: "प्रोफ़ाइल", icon: User }]
+      : []),
   ];
 
   // Hide on camera/full-screen pages

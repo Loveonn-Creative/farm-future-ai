@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Subscribe = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAuthenticated, refreshSubscription } = useAuth();
   const [phone, setPhone] = useState("");
   const [accessCode, setAccessCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -49,9 +51,10 @@ const Subscribe = () => {
     try {
       const { data, error } = await supabase.functions.invoke("verify-subscription", {
         body: {
-          phone: phone.replace(/\D/g, "").slice(-10), // Clean phone number
+          phone: phone.replace(/\D/g, "").slice(-10),
           accessCode,
           sessionId: localStorage.getItem("datakhet_session"),
+          userId: isAuthenticated ? user?.id : undefined,
         },
       });
 
@@ -63,6 +66,11 @@ const Subscribe = () => {
         localStorage.setItem("datakhet_phone", phone);
         localStorage.setItem("datakhet_plan", data.plan_type || "premium");
         
+        // Refresh auth subscription state if logged in
+        if (isAuthenticated) {
+          await refreshSubscription();
+        }
+
         setIsSubscribed(true);
         toast({
           title: "सदस्यता सफल! 🎉",
@@ -100,8 +108,8 @@ const Subscribe = () => {
           <p className="text-muted-foreground font-hindi mb-6">
             फ़ोन: {phone}
           </p>
-          <Button onClick={() => navigate("/")} className="font-hindi w-full">
-            जांच शुरू करें
+          <Button onClick={() => navigate(isAuthenticated ? "/profile" : "/")} className="font-hindi w-full">
+            {isAuthenticated ? "प्रोफ़ाइल देखें" : "जांच शुरू करें"}
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Scan, History, HelpCircle, ChevronDown } from "lucide-react";
+import { Scan, History, HelpCircle, ChevronDown, Crown, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,10 +8,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DesktopNav = () => {
   const location = useLocation();
   const { t, isHindi } = useLanguage();
+  const { isAuthenticated, isPremium } = useAuth();
 
   const navItems = [
     { path: "/", label: t('nav_scan'), icon: Scan },
@@ -29,6 +31,15 @@ const DesktopNav = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Determine CTA button
+  const ctaLink = !isAuthenticated ? "/pricing" : isPremium ? "/profile" : "/pricing";
+  const ctaLabel = !isAuthenticated
+    ? t('nav_subscribe')
+    : isPremium
+      ? (isHindi ? "प्रोफ़ाइल" : "Profile")
+      : (isHindi ? "अपग्रेड करें" : "Upgrade");
+  const CtaIcon = isPremium ? User : Crown;
 
   return (
     <nav className="hidden md:flex items-center justify-between px-6 py-3 bg-card border-b border-border">
@@ -78,10 +89,11 @@ const DesktopNav = () => {
         </DropdownMenu>
       </div>
 
-      {/* Subscribe CTA */}
-      <Link to="/subscribe">
+      {/* CTA */}
+      <Link to={ctaLink}>
         <Button className={`bg-primary hover:bg-primary-hover ${isHindi ? 'font-hindi' : ''}`}>
-          {t('nav_subscribe')}
+          <CtaIcon className="w-4 h-4 mr-2" />
+          {ctaLabel}
         </Button>
       </Link>
     </nav>

@@ -15,6 +15,9 @@ const translations: Translations = {
   nav_history: { hi: 'इतिहास', en: 'History' },
   nav_help: { hi: 'मदद', en: 'Help' },
   nav_subscribe: { hi: 'सदस्यता लें', en: 'Subscribe' },
+  nav_upgrade: { hi: 'अपग्रेड करें', en: 'Upgrade' },
+  nav_profile: { hi: 'प्रोफ़ाइल', en: 'Profile' },
+  nav_sign_in: { hi: 'लॉगिन करें', en: 'Sign In' },
   nav_more: { hi: 'और देखें', en: 'More' },
   
   // Secondary pages
