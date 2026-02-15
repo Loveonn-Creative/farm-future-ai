@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Menu, Sprout } from "lucide-react";
+import { Menu, Sprout, Crown, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -9,9 +9,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const MobileMenu = () => {
   const { t, isHindi } = useLanguage();
+  const { isAuthenticated, isPremium } = useAuth();
   
   const menuItems = [
     { path: "/about", label: t('nav_about') },
@@ -22,6 +24,14 @@ const MobileMenu = () => {
     { path: "/partners", label: t('nav_partners') },
     { path: "/faq", label: t('nav_faq') },
   ];
+
+  // Determine CTA
+  const ctaLink = !isAuthenticated ? "/pricing" : isPremium ? "/profile" : "/pricing";
+  const ctaLabel = !isAuthenticated
+    ? t('nav_subscribe')
+    : isPremium
+      ? (isHindi ? "प्रोफ़ाइल" : "Profile")
+      : (isHindi ? "अपग्रेड करें" : "Upgrade");
   
   return (
     <div className="fixed top-0 left-0 right-0 z-40 md:hidden">
@@ -65,13 +75,21 @@ const MobileMenu = () => {
                 </Link>
               ))}
               
-              {/* Subscribe CTA */}
-              <div className="pt-4 mt-4 border-t border-border">
-                <Link to="/subscribe">
+              {/* Auth-aware CTA */}
+              <div className="pt-4 mt-4 border-t border-border space-y-2">
+                <Link to={ctaLink}>
                   <Button className={`w-full ${isHindi ? 'font-hindi' : ''}`}>
-                    {t('nav_subscribe')}
+                    {isPremium ? <User className="w-4 h-4 mr-2" /> : <Crown className="w-4 h-4 mr-2" />}
+                    {ctaLabel}
                   </Button>
                 </Link>
+                {!isAuthenticated && (
+                  <Link to="/auth" className="block">
+                    <Button variant="outline" className={`w-full ${isHindi ? 'font-hindi' : ''}`}>
+                      {isHindi ? "लॉगिन करें" : "Sign In"}
+                    </Button>
+                  </Link>
+                )}
               </div>
             </nav>
           </SheetContent>

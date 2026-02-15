@@ -1,11 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Check, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SecondaryNav from "@/components/SecondaryNav";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Pricing = () => {
   const { t, isHindi } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handlePlanSelect = () => {
+    if (!isAuthenticated) {
+      navigate("/auth?redirect=/subscribe");
+    } else {
+      navigate("/subscribe");
+    }
+  };
   
   const plans = [
     {
@@ -172,11 +183,9 @@ const Pricing = () => {
 
         {/* CTA */}
         <div className="mt-8 text-center">
-          <Link to="/subscribe">
-            <Button size="lg" className={`w-full text-lg py-6 ${isHindi ? 'font-hindi' : ''}`}>
-              {isHindi ? "पूरी सुविधा जारी रखें" : "Get Full Access"}
-            </Button>
-          </Link>
+          <Button size="lg" onClick={handlePlanSelect} className={`w-full text-lg py-6 ${isHindi ? 'font-hindi' : ''}`}>
+            {isHindi ? "पूरी सुविधा जारी रखें" : "Get Full Access"}
+          </Button>
           <p className={`text-xs text-muted-foreground mt-3 ${isHindi ? 'font-hindi' : ''}`}>
             {isHindi ? "कभी भी बंद कर सकते हैं" : "Cancel anytime"}
           </p>

@@ -4,6 +4,7 @@ import { Camera, Upload, Loader2, Sprout, Wheat, Flower2, MapPin } from "lucide-
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
+import { useAuth } from "@/contexts/AuthContext";
 import DesktopNav from "@/components/DesktopNav";
 import MobileMenu from "@/components/MobileMenu";
 import OfflineIndicator from "@/components/OfflineIndicator";
@@ -14,6 +15,7 @@ type ScanCategory = "soil" | "crop" | "kitchen";
 const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isCapturing, setIsCapturing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [scanCategory, setScanCategory] = useState<ScanCategory | null>(null);
@@ -180,7 +182,7 @@ const Home = () => {
         language,
         latitude: scanLat,
         longitude: scanLng,
-        image_url: imageBase64.substring(0, 100), // Store reference only
+        image_url: imageBase64.substring(0, 100),
         soil_type: data.soil_type,
         ph_level: data.ph_level,
         nitrogen_level: data.nitrogen_level,
@@ -195,6 +197,7 @@ const Home = () => {
         insights: data.insights,
         crop_type: data.crop_type,
         plot_name: activePlot?.name || null,
+        ...(user ? { user_id: user.id } : {}),
       };
 
       if (isOnline) {

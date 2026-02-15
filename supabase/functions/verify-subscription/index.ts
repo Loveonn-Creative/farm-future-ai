@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { phone, accessCode, sessionId } = await req.json();
+    const { phone, accessCode, sessionId, userId } = await req.json();
     
-    console.log('Verifying subscription:', { phone, accessCode: accessCode?.substring(0, 3) + '***' });
+    console.log('Verifying subscription:', { phone, accessCode: accessCode?.substring(0, 3) + '***', userId: userId ? 'present' : 'none' });
 
     // Validate inputs
     if (!phone || phone.length < 10) {
@@ -78,26 +78,25 @@ serve(async (req) => {
       }
     }
 
+    // Calculate expiry
+    const now = new Date();
+    let expiresAt = new Date();
+    switch (subscriber.plan_type) {
+      case 'trial':
+        expiresAt.setDate(expiresAt.getDate() + 7);
+        break;
+      case '6month':
+        expiresAt.setMonth(expiresAt.getMonth() + 6);
+        break;
+      case '1year':
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        break;
+      default:
+        expiresAt.setMonth(expiresAt.getMonth() + 6);
+    }
+
     // Activate the subscription if not already active
     if (!subscriber.is_active) {
-      const now = new Date();
-      let expiresAt = new Date();
-      
-      // Set expiry based on plan type
-      switch (subscriber.plan_type) {
-        case 'trial':
-          expiresAt.setDate(expiresAt.getDate() + 7); // 7 days trial
-          break;
-        case '6month':
-          expiresAt.setMonth(expiresAt.getMonth() + 6);
-          break;
-        case '1year':
-          expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-          break;
-        default: // premium (default 6 months)
-          expiresAt.setMonth(expiresAt.getMonth() + 6);
-      }
-
       const { error: updateError } = await supabase
         .from('subscribers')
         .update({
@@ -122,10 +121,47 @@ serve(async (req) => {
       console.log('Subscription activated successfully:', subscriber.id);
     }
 
+    // If user is authenticated, create/update user_subscriptions and assign premium role
+    if (userId) {
+      try {
+        // Upsert user_subscription
+        const { error: subError } = await supabase
+          .from('user_subscriptions')
+          .upsert({
+            user_id: userId,
+            plan_type: subscriber.plan_type || 'premium',
+            access_code: accessCode,
+            activated_at: now.toISOString(),
+            expires_at: subscriber.expires_at || expiresAt.toISOString(),
+            is_active: true,
+          }, { onConflict: 'user_id' });
+
+        if (subError) {
+          console.error('Failed to create user_subscription:', subError);
+        }
+
+        // Assign premium role (ignore conflict if already exists)
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .upsert({
+            user_id: userId,
+            role: 'premium',
+          }, { onConflict: 'user_id,role' });
+
+        if (roleError) {
+          console.error('Failed to assign premium role:', roleError);
+        }
+
+        console.log('User subscription and role updated for:', userId);
+      } catch (e) {
+        console.error('Error updating user subscription:', e);
+      }
+    }
+
     return new Response(JSON.stringify({ 
       success: true,
       plan_type: subscriber.plan_type,
-      expires_at: subscriber.expires_at,
+      expires_at: subscriber.expires_at || expiresAt.toISOString(),
       message: "सदस्यता सफल! अब आपको पूरी सुविधा मिलेगी।"
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
