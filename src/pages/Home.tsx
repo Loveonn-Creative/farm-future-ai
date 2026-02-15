@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
 import { useAuth } from "@/contexts/AuthContext";
+
 import DesktopNav from "@/components/DesktopNav";
 import MobileMenu from "@/components/MobileMenu";
 import OfflineIndicator from "@/components/OfflineIndicator";
@@ -15,7 +16,7 @@ type ScanCategory = "soil" | "crop" | "kitchen";
 const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isCapturing, setIsCapturing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [scanCategory, setScanCategory] = useState<ScanCategory | null>(null);
@@ -328,10 +329,12 @@ const Home = () => {
 
       {/* Main content - centered */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20 md:pb-8 pt-16 md:pt-0">
-        {/* Single powerful headline */}
+      {/* Personalized headline */}
         <h1 className="text-2xl md:text-3xl font-bold text-foreground text-center font-hindi animate-sunrise mb-12 leading-relaxed">
-          मिट्टी देखो। फसल जानो।<br />
-          <span className="text-primary">बेहतर कमाओ।</span>
+          {user && profile?.display_name
+            ? `${profile.display_name}, आज क्या जांचें?`
+            : <>मिट्टी देखो। फसल जानो।<br /><span className="text-primary">बेहतर कमाओ।</span></>
+          }
         </h1>
 
         {/* Scan buttons - Grid layout for 3 buttons */}
