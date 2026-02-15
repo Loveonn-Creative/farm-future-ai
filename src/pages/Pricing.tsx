@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Check, X, ArrowRight, Smartphone, Copy } from "lucide-react";
+import { Check, X, ArrowRight, Smartphone, Copy, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SecondaryNav from "@/components/SecondaryNav";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,7 +12,7 @@ const UPI_ID = "7260064476@pz";
 
 const Pricing = () => {
   const { t, isHindi } = useLanguage();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isPremium, subscription } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -77,6 +77,26 @@ const Pricing = () => {
       </header>
 
       <main className="p-4 max-w-lg mx-auto">
+        {/* Active subscription banner */}
+        {isPremium && subscription && (
+          <div className="mt-4 bg-success/10 border-2 border-success/30 rounded-xl p-5 flex items-start gap-3">
+            <Crown className="w-7 h-7 text-success shrink-0 mt-0.5" />
+            <div>
+              <h3 className={`font-semibold text-foreground ${isHindi ? 'font-hindi' : ''}`}>
+                {isHindi ? "प्रीमियम सदस्यता सक्रिय ✓" : "Premium Subscription Active ✓"}
+              </h3>
+              <p className={`text-sm text-muted-foreground mt-1 ${isHindi ? 'font-hindi' : ''}`}>
+                {isHindi ? "प्लान: " : "Plan: "}<span className="font-semibold text-foreground">{subscription.plan_type}</span>
+              </p>
+              {subscription.expires_at && (
+                <p className={`text-sm text-muted-foreground ${isHindi ? 'font-hindi' : ''}`}>
+                  {isHindi ? "समाप्ति: " : "Expires: "}<span className="font-semibold text-foreground">{new Date(subscription.expires_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Pricing cards */}
         <div className="space-y-4 mt-6">
           {plans.map((plan, index) => (
