@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/profile";
+  const redirect = searchParams.get("redirect") || "/";
   const { signIn, signUp, isAuthenticated, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { isHindi } = useLanguage();
