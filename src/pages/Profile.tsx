@@ -178,7 +178,7 @@ const Profile = () => {
                 </span>
               </div>
               <ul className={`text-xs text-muted-foreground space-y-1 ${isHindi ? "font-hindi" : ""}`}>
-                <li>✓ {isHindi ? "प्रतिदिन 2 मिट्टी जांच" : "2 soil scans per day"}</li>
+                <li>✓ {isHindi ? "प्रतिमाह 10 मिट्टी जांच" : "10 soil scans per month"}</li>
                 <li>✓ {isHindi ? "बुनियादी AI रिपोर्ट" : "Basic AI reports"}</li>
                 <li className="text-muted-foreground/60">✗ {isHindi ? "विस्तृत रिपोर्ट (प्रीमियम)" : "Detailed reports (Premium)"}</li>
                 <li className="text-muted-foreground/60">✗ {isHindi ? "व्यक्तिगत सलाह (प्रीमियम)" : "Personalized advice (Premium)"}</li>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Sprout, Mail, Lock, Phone, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get("redirect") || "/profile";
-  const { signIn, signUp, isAuthenticated } = useAuth();
+  const { signIn, signUp, isAuthenticated, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { isHindi } = useLanguage();
 
@@ -25,10 +25,19 @@ const Auth = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate(redirect, { replace: true });
-    return null;
+  // Redirect if already authenticated (in useEffect to avoid render-time navigation)
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate(redirect, { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate, redirect]);
+
+  if (authLoading || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,9 +77,8 @@ const Auth = () => {
             description: error,
             variant: "destructive",
           });
-        } else {
-          navigate(redirect, { replace: true });
         }
+        // Navigation handled by useEffect when isAuthenticated changes
       } else {
         const { error } = await signUp(email, password, phone);
         if (error) {
