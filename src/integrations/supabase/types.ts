@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          district: string | null
+          id: string
+          language_preference: string
+          phone: string | null
+          primary_crops: string[] | null
+          state: string | null
+          total_land_bigha: number | null
+          updated_at: string
+          village: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          district?: string | null
+          id: string
+          language_preference?: string
+          phone?: string | null
+          primary_crops?: string[] | null
+          state?: string | null
+          total_land_bigha?: number | null
+          updated_at?: string
+          village?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          district?: string | null
+          id?: string
+          language_preference?: string
+          phone?: string | null
+          primary_crops?: string[] | null
+          state?: string | null
+          total_land_bigha?: number | null
+          updated_at?: string
+          village?: string | null
+        }
+        Relationships: []
+      }
       soil_scans: {
         Row: {
           analysis_summary: string | null
@@ -45,6 +87,7 @@ export type Database = {
           scan_type: string
           session_id: string | null
           soil_type: string | null
+          user_id: string | null
         }
         Insert: {
           analysis_summary?: string | null
@@ -76,6 +119,7 @@ export type Database = {
           scan_type?: string
           session_id?: string | null
           soil_type?: string | null
+          user_id?: string | null
         }
         Update: {
           analysis_summary?: string | null
@@ -107,6 +151,7 @@ export type Database = {
           scan_type?: string
           session_id?: string | null
           soil_type?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -146,15 +191,72 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          access_code: string | null
+          activated_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          plan_type: string
+          user_id: string
+        }
+        Insert: {
+          access_code?: string | null
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          plan_type?: string
+          user_id: string
+        }
+        Update: {
+          access_code?: string | null
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          plan_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "user" | "premium" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -281,6 +383,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["user", "premium", "admin"],
+    },
   },
 } as const
