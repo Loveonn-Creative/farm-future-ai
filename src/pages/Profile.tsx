@@ -146,6 +146,12 @@ const Profile = () => {
           </div>
           {isPremium && subscription ? (
             <div className="space-y-3">
+              <div className="flex items-center gap-2 bg-success/10 px-3 py-2 rounded-lg">
+                <Crown className="w-4 h-4 text-success" />
+                <span className={`text-sm font-semibold text-success ${isHindi ? "font-hindi" : ""}`}>
+                  {isHindi ? "प्रीमियम सक्रिय ✓" : "Premium Active ✓"}
+                </span>
+              </div>
               <div className="flex justify-between text-sm">
                 <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
                   {isHindi ? "प्लान" : "Plan"}
@@ -162,33 +168,28 @@ const Profile = () => {
                   </span>
                 </div>
               )}
-              <div className="pt-2 border-t border-border">
-                <p className={`text-xs text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
-                  {isHindi ? "नवीनीकरण के लिए WhatsApp पर संपर्क करें" : "Contact via WhatsApp for renewal"}
-                </p>
-              </div>
             </div>
           ) : (
             <div className="space-y-3">
-              <p className={`text-sm text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
-                {isHindi ? "अभी कोई सक्रिय प्लान नहीं है" : "No active plan"}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => navigate("/pricing")}
-                  className={`flex-1 ${isHindi ? "font-hindi" : ""}`}
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  {isHindi ? "अपग्रेड करें" : "Upgrade"}
-                </Button>
-                <Button
-                  onClick={() => navigate("/subscribe")}
-                  variant="outline"
-                  className={`flex-1 ${isHindi ? "font-hindi" : ""}`}
-                >
-                  {isHindi ? "कोड डालें" : "Enter Code"}
-                </Button>
+              {/* Freemium tier info */}
+              <div className="flex items-center gap-2 bg-accent/10 px-3 py-2 rounded-lg">
+                <span className={`text-sm font-medium text-foreground ${isHindi ? "font-hindi" : ""}`}>
+                  {isHindi ? "फ्री प्लान" : "Free Plan"}
+                </span>
               </div>
+              <ul className={`text-xs text-muted-foreground space-y-1 ${isHindi ? "font-hindi" : ""}`}>
+                <li>✓ {isHindi ? "प्रतिदिन 2 मिट्टी जांच" : "2 soil scans per day"}</li>
+                <li>✓ {isHindi ? "बुनियादी AI रिपोर्ट" : "Basic AI reports"}</li>
+                <li className="text-muted-foreground/60">✗ {isHindi ? "विस्तृत रिपोर्ट (प्रीमियम)" : "Detailed reports (Premium)"}</li>
+                <li className="text-muted-foreground/60">✗ {isHindi ? "व्यक्तिगत सलाह (प्रीमियम)" : "Personalized advice (Premium)"}</li>
+              </ul>
+              <Button
+                onClick={() => navigate("/pricing")}
+                className={`w-full ${isHindi ? "font-hindi" : ""}`}
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                {isHindi ? "प्रीमियम में अपग्रेड करें" : "Upgrade to Premium"}
+              </Button>
             </div>
           )}
         </div>
