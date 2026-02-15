@@ -6,22 +6,24 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/";
+  const redirect = searchParams.get("redirect") || "/profile";
   const { signIn, signUp, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const { isHindi } = useLanguage();
 
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -31,11 +33,34 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (mode === "forgot") {
+      if (!email) return;
+      setLoading(true);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/profile`,
+        });
+        if (error) {
+          toast({
+            title: isHindi ? "त्रुटि" : "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          setResetSent(true);
+        }
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (!email || !password) return;
 
     setLoading(true);
     try {
-      if (isLogin) {
+      if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
@@ -63,6 +88,29 @@ const Auth = () => {
     }
   };
 
+  if (resetSent) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center">
+            <Mail className="w-10 h-10 text-primary" />
+          </div>
+          <h1 className={`text-2xl font-bold text-foreground mb-2 ${isHindi ? "font-hindi" : ""}`}>
+            {isHindi ? "रीसेट लिंक भेजा गया! 📧" : "Reset Link Sent! 📧"}
+          </h1>
+          <p className={`text-muted-foreground mb-6 ${isHindi ? "font-hindi" : ""}`}>
+            {isHindi
+              ? "कृपया अपना ईमेल जांचें और पासवर्ड रीसेट लिंक पर क्लिक करें।"
+              : "Please check your email and click the password reset link."}
+          </p>
+          <Button onClick={() => { setResetSent(false); setMode("login"); }} variant="outline" className={`w-full ${isHindi ? "font-hindi" : ""}`}>
+            {isHindi ? "लॉगिन पर जाएं" : "Go to Login"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (emailSent) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
@@ -78,7 +126,7 @@ const Auth = () => {
               ? "कृपया अपना ईमेल जांचें और लिंक पर क्लिक करके पुष्टि करें।"
               : "Please check your email and click the confirmation link."}
           </p>
-          <Button onClick={() => { setEmailSent(false); setIsLogin(true); }} variant="outline" className={`w-full ${isHindi ? "font-hindi" : ""}`}>
+          <Button onClick={() => { setEmailSent(false); setMode("login"); }} variant="outline" className={`w-full ${isHindi ? "font-hindi" : ""}`}>
             {isHindi ? "लॉगिन पर जाएं" : "Go to Login"}
           </Button>
         </div>
@@ -95,9 +143,11 @@ const Auth = () => {
           <span className="font-bold text-lg">DataKhet</span>
         </Link>
         <h1 className={`text-xl font-bold ${isHindi ? "font-hindi" : ""}`}>
-          {isLogin
-            ? isHindi ? "अपने खाते में लॉगिन करें" : "Sign In to Your Account"
-            : isHindi ? "नया खाता बनाएं" : "Create Your Account"}
+          {mode === "forgot"
+            ? isHindi ? "पासवर्ड रीसेट करें" : "Reset Password"
+            : mode === "login"
+              ? isHindi ? "अपने खाते में लॉगिन करें" : "Sign In to Your Account"
+              : isHindi ? "नया खाता बनाएं" : "Create Your Account"}
         </h1>
       </header>
 
@@ -119,34 +169,49 @@ const Auth = () => {
             />
           </div>
 
-          {/* Password */}
-          <div className="space-y-2">
-            <label className={`text-sm text-foreground flex items-center gap-2 ${isHindi ? "font-hindi" : ""}`}>
-              <Lock className="w-4 h-4 text-muted-foreground" />
-              {isHindi ? "पासवर्ड" : "Password"}
-            </label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 pr-10"
-                required
-                minLength={6}
-              />
+          {/* Password (not shown in forgot mode) */}
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <label className={`text-sm text-foreground flex items-center gap-2 ${isHindi ? "font-hindi" : ""}`}>
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                {isHindi ? "पासवर्ड" : "Password"}
+              </label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 pr-10"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Forgot password link (login mode only) */}
+          {mode === "login" && (
+            <div className="text-right">
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                onClick={() => setMode("forgot")}
+                className={`text-sm text-primary hover:underline ${isHindi ? "font-hindi" : ""}`}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {isHindi ? "पासवर्ड भूल गए?" : "Forgot password?"}
               </button>
             </div>
-          </div>
+          )}
 
           {/* Phone (signup only) */}
-          {!isLogin && (
+          {mode === "signup" && (
             <div className="space-y-2">
               <label className={`text-sm text-foreground flex items-center gap-2 ${isHindi ? "font-hindi" : ""}`}>
                 <Phone className="w-4 h-4 text-muted-foreground" />
@@ -167,24 +232,36 @@ const Auth = () => {
           <Button type="submit" disabled={loading} className={`w-full h-12 text-lg ${isHindi ? "font-hindi" : ""}`}>
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
-            ) : isLogin ? (
+            ) : mode === "forgot" ? (
+              isHindi ? "रीसेट लिंक भेजें" : "Send Reset Link"
+            ) : mode === "login" ? (
               isHindi ? "लॉगिन करें" : "Sign In"
             ) : (
               isHindi ? "खाता बनाएं" : "Create Account"
             )}
           </Button>
 
-          {/* Toggle login/signup */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className={`text-sm text-primary hover:underline ${isHindi ? "font-hindi" : ""}`}
-            >
-              {isLogin
-                ? isHindi ? "नया खाता बनाएं →" : "Create an account →"
-                : isHindi ? "पहले से खाता है? लॉगिन करें →" : "Already have an account? Sign in →"}
-            </button>
+          {/* Toggle login/signup/forgot */}
+          <div className="text-center space-y-2">
+            {mode === "forgot" ? (
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className={`text-sm text-primary hover:underline ${isHindi ? "font-hindi" : ""}`}
+              >
+                {isHindi ? "← लॉगिन पर वापस जाएं" : "← Back to Login"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                className={`text-sm text-primary hover:underline ${isHindi ? "font-hindi" : ""}`}
+              >
+                {mode === "login"
+                  ? isHindi ? "नया खाता बनाएं →" : "Create an account →"
+                  : isHindi ? "पहले से खाता है? लॉगिन करें →" : "Already have an account? Sign in →"}
+              </button>
+            )}
           </div>
 
           {/* Continue as guest */}

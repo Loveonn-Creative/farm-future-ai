@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { User, MapPin, Wheat, LogOut, Crown, Settings, ChevronRight, Loader2, Save } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { User, MapPin, Wheat, LogOut, Crown, Settings, ChevronRight, Loader2, Save, CreditCard, Shield, Mail, Phone as PhoneIcon, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import SecondaryNav from "@/components/SecondaryNav";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ const Profile = () => {
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [updatingPassword, setUpdatingPassword] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
     phone: "",
@@ -72,6 +76,23 @@ const Profile = () => {
     setSaving(false);
   };
 
+  const handlePasswordUpdate = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast({ title: isHindi ? "त्रुटि" : "Error", description: isHindi ? "पासवर्ड कम से कम 6 अक्षर का होना चाहिए" : "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+    setUpdatingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      toast({ title: isHindi ? "त्रुटि" : "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: isHindi ? "पासवर्ड बदला गया ✓" : "Password updated ✓" });
+      setChangingPassword(false);
+      setNewPassword("");
+    }
+    setUpdatingPassword(false);
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -87,25 +108,27 @@ const Profile = () => {
 
   if (!isAuthenticated) return null;
 
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || (isHindi ? "किसान" : "Farmer");
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <SecondaryNav title={isHindi ? "प्रोफ़ाइल" : "Profile"} />
 
       <main className="p-4 max-w-lg mx-auto space-y-6 mt-4">
-        {/* User info card */}
-        <div className="bg-card rounded-xl border border-border p-5">
+        {/* Welcome banner */}
+        <div className="bg-gradient-earth text-primary-foreground rounded-xl p-5">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="w-7 h-7 text-primary" />
+            <div className="w-14 h-14 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+              <User className="w-7 h-7" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className={`font-semibold text-foreground truncate ${isHindi ? "font-hindi" : ""}`}>
-                {profile?.display_name || user?.email?.split("@")[0] || (isHindi ? "किसान" : "Farmer")}
+              <h2 className={`text-lg font-semibold truncate ${isHindi ? "font-hindi" : ""}`}>
+                {isHindi ? `नमस्ते, ${displayName}! 🙏` : `Hello, ${displayName}! 🙏`}
               </h2>
-              <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+              <p className="text-sm opacity-80 truncate">{user?.email}</p>
             </div>
             {isPremium && (
-              <div className="flex items-center gap-1 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold">
+              <div className="flex items-center gap-1 bg-primary-foreground/20 px-3 py-1 rounded-full text-xs font-semibold">
                 <Crown className="w-3 h-3" />
                 Premium
               </div>
@@ -115,16 +138,19 @@ const Profile = () => {
 
         {/* Subscription section */}
         <div className="bg-card rounded-xl border border-border p-5">
-          <h3 className={`font-semibold text-foreground mb-3 ${isHindi ? "font-hindi" : ""}`}>
-            {isHindi ? "सदस्यता" : "Subscription"}
-          </h3>
+          <div className="flex items-center gap-2 mb-3">
+            <CreditCard className="w-4 h-4 text-primary" />
+            <h3 className={`font-semibold text-foreground ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi ? "सदस्यता" : "Subscription"}
+            </h3>
+          </div>
           {isPremium && subscription ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
                   {isHindi ? "प्लान" : "Plan"}
                 </span>
-                <span className="font-medium text-foreground">{subscription.plan_type}</span>
+                <span className="font-medium text-foreground capitalize">{subscription.plan_type}</span>
               </div>
               {subscription.expires_at && (
                 <div className="flex justify-between text-sm">
@@ -136,21 +162,33 @@ const Profile = () => {
                   </span>
                 </div>
               )}
+              <div className="pt-2 border-t border-border">
+                <p className={`text-xs text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
+                  {isHindi ? "नवीनीकरण के लिए WhatsApp पर संपर्क करें" : "Contact via WhatsApp for renewal"}
+                </p>
+              </div>
             </div>
           ) : (
-            <div>
-              <p className={`text-sm text-muted-foreground mb-3 ${isHindi ? "font-hindi" : ""}`}>
+            <div className="space-y-3">
+              <p className={`text-sm text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
                 {isHindi ? "अभी कोई सक्रिय प्लान नहीं है" : "No active plan"}
               </p>
-              <Button
-                onClick={() => navigate("/pricing")}
-                variant="outline"
-                className={`w-full ${isHindi ? "font-hindi" : ""}`}
-              >
-                <Crown className="w-4 h-4 mr-2" />
-                {isHindi ? "अपग्रेड करें" : "Upgrade"}
-                <ChevronRight className="w-4 h-4 ml-auto" />
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate("/pricing")}
+                  className={`flex-1 ${isHindi ? "font-hindi" : ""}`}
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  {isHindi ? "अपग्रेड करें" : "Upgrade"}
+                </Button>
+                <Button
+                  onClick={() => navigate("/subscribe")}
+                  variant="outline"
+                  className={`flex-1 ${isHindi ? "font-hindi" : ""}`}
+                >
+                  {isHindi ? "कोड डालें" : "Enter Code"}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -158,9 +196,12 @@ const Profile = () => {
         {/* Farming profile */}
         <div className="bg-card rounded-xl border border-border p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className={`font-semibold text-foreground ${isHindi ? "font-hindi" : ""}`}>
-              {isHindi ? "खेती की जानकारी" : "Farm Details"}
-            </h3>
+            <div className="flex items-center gap-2">
+              <Wheat className="w-4 h-4 text-primary" />
+              <h3 className={`font-semibold text-foreground ${isHindi ? "font-hindi" : ""}`}>
+                {isHindi ? "खेती की जानकारी" : "Farm Details"}
+              </h3>
+            </div>
             {!editing && (
               <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
                 <Settings className="w-4 h-4 mr-1" />
@@ -235,6 +276,12 @@ const Profile = () => {
             </div>
           ) : (
             <div className="space-y-3 text-sm">
+              {profile?.phone && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <PhoneIcon className="w-4 h-4" />
+                  <span>{profile.phone}</span>
+                </div>
+              )}
               {profile?.village && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
@@ -260,6 +307,71 @@ const Profile = () => {
               )}
             </div>
           )}
+        </div>
+
+        {/* Account Settings */}
+        <div className="bg-card rounded-xl border border-border p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-4 h-4 text-primary" />
+            <h3 className={`font-semibold text-foreground ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi ? "खाता सेटिंग्स" : "Account Settings"}
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Mail className="w-4 h-4" />
+              <span>{user?.email}</span>
+            </div>
+
+            {changingPassword ? (
+              <div className="space-y-3 pt-2">
+                <Input
+                  type="password"
+                  placeholder={isHindi ? "नया पासवर्ड (कम से कम 6 अक्षर)" : "New password (min 6 chars)"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="h-10"
+                  minLength={6}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handlePasswordUpdate} disabled={updatingPassword} className={`flex-1 ${isHindi ? "font-hindi" : ""}`}>
+                    {updatingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : isHindi ? "पासवर्ड बदलें" : "Update"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setChangingPassword(false); setNewPassword(""); }}>
+                    {isHindi ? "रद्द" : "Cancel"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setChangingPassword(true)}
+                className={`w-full justify-start ${isHindi ? "font-hindi" : ""}`}
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                {isHindi ? "पासवर्ड बदलें" : "Change Password"}
+                <ChevronRight className="w-4 h-4 ml-auto" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div className="bg-card rounded-xl border border-border p-5 space-y-2">
+          <Link to="/history" className={`flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors ${isHindi ? "font-hindi" : ""}`}>
+            <span className="text-sm text-foreground">{isHindi ? "जांच इतिहास" : "Scan History"}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          <Link to="/saved-plots" className={`flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors ${isHindi ? "font-hindi" : ""}`}>
+            <span className="text-sm text-foreground">{isHindi ? "मेरे खेत" : "My Plots"}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          <Link to="/help" className={`flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors ${isHindi ? "font-hindi" : ""}`}>
+            <span className="text-sm text-foreground">{isHindi ? "मदद" : "Help"}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
         </div>
 
         {/* Sign out */}
