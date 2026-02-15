@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const UPI_ID = "7260064476@zp";
+const UPI_ID = "7260064476@pz";
 
 const Pricing = () => {
   const { t, isHindi } = useLanguage();
