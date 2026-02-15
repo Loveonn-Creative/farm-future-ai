@@ -1,204 +1,113 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Key, CheckCircle2, Loader2 } from "lucide-react";
+import { Crown, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import SecondaryNav from "@/components/SecondaryNav";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Subscribe = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user, isAuthenticated, refreshSubscription } = useAuth();
-  const [phone, setPhone] = useState("");
-  const [accessCode, setAccessCode] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const { isAuthenticated, isPremium, subscription } = useAuth();
+  const { isHindi } = useLanguage();
 
-  // Check if already subscribed on mount
-  useState(() => {
-    const subscribed = localStorage.getItem("datakhet_subscribed");
-    const savedPhone = localStorage.getItem("datakhet_phone");
-    if (subscribed === "true" && savedPhone) {
-      setIsSubscribed(true);
-      setPhone(savedPhone);
-    }
-  });
-
-  const handleVerify = async () => {
-    // Validate inputs
-    if (!phone || phone.length < 10) {
-      toast({
-        title: "गलत फ़ोन नंबर",
-        description: "कृपया सही 10 अंकों का फ़ोन नंबर डालें",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!accessCode || accessCode.length !== 9) {
-      toast({
-        title: "गलत कोड",
-        description: "कृपया सही 9 अंकों का कोड डालें",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsVerifying(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("verify-subscription", {
-        body: {
-          phone: phone.replace(/\D/g, "").slice(-10),
-          accessCode,
-          sessionId: localStorage.getItem("datakhet_session"),
-          userId: isAuthenticated ? user?.id : undefined,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        // Save to localStorage
-        localStorage.setItem("datakhet_subscribed", "true");
-        localStorage.setItem("datakhet_phone", phone);
-        localStorage.setItem("datakhet_plan", data.plan_type || "premium");
-        
-        // Refresh auth subscription state if logged in
-        if (isAuthenticated) {
-          await refreshSubscription();
-        }
-
-        setIsSubscribed(true);
-        toast({
-          title: "सदस्यता सफल! 🎉",
-          description: "अब आपको पूरी सुविधा मिलेगी",
-        });
-      } else {
-        toast({
-          title: "सत्यापन विफल",
-          description: data.message || "फ़ोन नंबर या कोड गलत है",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Verification error:", error);
-      toast({
-        title: "त्रुटि",
-        description: "कृपया दोबारा कोशिश करें",
-        variant: "destructive",
-      });
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  if (isSubscribed) {
+  // Already premium — show status
+  if (isPremium && subscription) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
-        <div className="w-full max-w-sm text-center">
+      <div className="min-h-screen bg-background">
+        <SecondaryNav title={isHindi ? "सदस्यता" : "Subscribe"} />
+        <div className="flex flex-col items-center justify-center p-6 mt-16">
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-success/20 flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-success" />
           </div>
-          <h1 className="text-2xl font-bold font-hindi text-foreground mb-2">
-            आप सदस्य हैं! 🎉
+          <h1 className={`text-2xl font-bold text-foreground mb-2 ${isHindi ? "font-hindi" : ""}`}>
+            {isHindi ? "आप प्रीमियम सदस्य हैं! 🎉" : "You're a Premium Member! 🎉"}
           </h1>
-          <p className="text-muted-foreground font-hindi mb-6">
-            फ़ोन: {phone}
+          <p className={`text-muted-foreground mb-1 ${isHindi ? "font-hindi" : ""}`}>
+            {isHindi ? "प्लान: " : "Plan: "}
+            <span className="font-semibold text-foreground">{subscription.plan_type}</span>
           </p>
-          <Button onClick={() => navigate(isAuthenticated ? "/profile" : "/")} className="font-hindi w-full">
-            {isAuthenticated ? "प्रोफ़ाइल देखें" : "जांच शुरू करें"}
+          {subscription.expires_at && (
+            <p className={`text-muted-foreground mb-6 ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi ? "समाप्ति: " : "Expires: "}
+              <span className="font-semibold text-foreground">
+                {new Date(subscription.expires_at).toLocaleDateString(isHindi ? "hi-IN" : "en-IN", {
+                  day: "numeric", month: "long", year: "numeric",
+                })}
+              </span>
+            </p>
+          )}
+          <Button onClick={() => navigate("/profile")} className={`w-full max-w-xs ${isHindi ? "font-hindi" : ""}`}>
+            {isHindi ? "प्रोफ़ाइल देखें" : "View Profile"}
           </Button>
         </div>
       </div>
     );
   }
 
+  const benefits = isHindi
+    ? ["असीमित मिट्टी जांच", "विस्तृत AI रिपोर्ट", "व्यक्तिगत फसल सलाह", "इतिहास और तुलना"]
+    : ["Unlimited soil scans", "Detailed AI reports", "Personalized crop advice", "History & comparison"];
+
   return (
-    <div className="min-h-screen flex flex-col bg-background pb-20">
-      {/* Header */}
-      <header className="bg-gradient-earth text-primary-foreground p-6 text-center">
-        <h1 className="text-2xl font-bold font-hindi">पूरी सुविधा लें</h1>
-        <p className="text-sm opacity-80 mt-1 font-hindi">
-          रोज़ की जांच • व्यक्तिगत सलाह • पूरी रिपोर्ट
-        </p>
-      </header>
+    <div className="min-h-screen bg-background">
+      <SecondaryNav title={isHindi ? "सदस्यता" : "Subscribe"} />
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-sm space-y-6">
-          {/* Plan info */}
-          <div className="bg-accent/10 rounded-xl p-4 border border-accent/20">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-hindi text-foreground">प्रीमियम सदस्यता</span>
-              <span className="text-xl font-bold text-primary">₹5/दिन</span>
-            </div>
-            <ul className="space-y-1 text-sm text-muted-foreground font-hindi">
-              <li>✓ असीमित जांच</li>
-              <li>✓ विस्तृत रिपोर्ट</li>
-              <li>✓ व्यक्तिगत सलाह</li>
-              <li>✓ इतिहास और तुलना</li>
-            </ul>
-          </div>
-
-          {/* Phone input */}
-          <div className="space-y-2">
-            <label className="text-sm font-hindi text-foreground flex items-center gap-2">
-              <Phone className="w-4 h-4 text-muted-foreground" />
-              फ़ोन नंबर
-            </label>
-            <Input
-              type="tel"
-              placeholder="9876543210"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              className="text-lg h-12 font-hindi"
-              maxLength={10}
-            />
-          </div>
-
-          {/* Access code input */}
-          <div className="space-y-2">
-            <label className="text-sm font-hindi text-foreground flex items-center gap-2">
-              <Key className="w-4 h-4 text-muted-foreground" />
-              आपका कोड
-            </label>
-            <Input
-              type="text"
-              placeholder="123456789"
-              value={accessCode}
-              onChange={(e) => setAccessCode(e.target.value.replace(/\D/g, "").slice(0, 9))}
-              className="text-lg h-12 tracking-widest text-center font-mono"
-              maxLength={9}
-            />
-          </div>
-
-          {/* Submit button */}
-          <Button
-            onClick={handleVerify}
-            disabled={isVerifying || !phone || !accessCode}
-            className="w-full h-12 text-lg font-hindi"
-          >
-            {isVerifying ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                सत्यापित हो रहा है...
-              </>
-            ) : (
-              "सदस्यता लें"
-            )}
-          </Button>
-
-          {/* Helper text */}
-          <p className="text-center text-sm text-muted-foreground font-hindi">
-            * कोड हमारे कार्यकर्ता से मिलेगा
-          </p>
-          <p className="text-center text-xs text-muted-foreground font-hindi">
-            संपर्क: WhatsApp पर "सदस्यता" भेजें
-          </p>
+      <main className="flex flex-col items-center p-6 mt-4 max-w-md mx-auto">
+        {/* Hero */}
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <Crown className="w-8 h-8 text-primary" />
         </div>
+        <h1 className={`text-2xl font-bold text-foreground text-center mb-2 ${isHindi ? "font-hindi" : ""}`}>
+          {isHindi ? "प्रीमियम सदस्यता लें" : "Get Premium Access"}
+        </h1>
+        <p className={`text-muted-foreground text-center mb-6 ${isHindi ? "font-hindi" : ""}`}>
+          {isHindi ? "सिर्फ ₹5/दिन में पूरी सुविधा" : "Full features for just ₹5/day"}
+        </p>
+
+        {/* Benefits */}
+        <div className="w-full bg-accent/10 rounded-xl p-4 border border-accent/20 mb-6">
+          <ul className="space-y-2">
+            {benefits.map((b, i) => (
+              <li key={i} className={`flex items-center gap-2 text-sm text-foreground ${isHindi ? "font-hindi" : ""}`}>
+                <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                {b}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* CTA */}
+        {!isAuthenticated ? (
+          <div className="w-full space-y-3">
+            <Button
+              onClick={() => navigate("/auth?redirect=/pricing")}
+              className={`w-full h-12 text-base ${isHindi ? "font-hindi" : ""}`}
+            >
+              {isHindi ? "साइन अप / लॉग इन करें" : "Sign Up / Log In"}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            <p className={`text-center text-xs text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi
+                ? "लॉग इन के बाद UPI से भुगतान करें — स्क्रीनशॉट से तुरंत सत्यापन"
+                : "After login, pay via UPI — instant verification with screenshot"}
+            </p>
+          </div>
+        ) : (
+          <div className="w-full space-y-3">
+            <Button
+              onClick={() => navigate("/pricing")}
+              className={`w-full h-12 text-base ${isHindi ? "font-hindi" : ""}`}
+            >
+              {isHindi ? "प्लान चुनें और भुगतान करें" : "Choose Plan & Pay"}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            <p className={`text-center text-xs text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi
+                ? "UPI भुगतान करें → स्क्रीनशॉट अपलोड करें → तुरंत सक्रिय"
+                : "Pay via UPI → Upload screenshot → Instantly activated"}
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );
