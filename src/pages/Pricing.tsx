@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, X, ArrowRight, Smartphone, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import SecondaryNav from "@/components/SecondaryNav";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import PaymentVerification from "@/components/PaymentVerification";
 
 const UPI_ID = "7260064476@pz";
 
@@ -13,6 +15,7 @@ const Pricing = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   const handlePlanSelect = () => {
     if (!isAuthenticated) {
@@ -29,6 +32,7 @@ const Pricing = () => {
   
   const plans = [
     {
+      key: "daily",
       name: isHindi ? "रोज़ाना" : "Daily",
       price: "₹5",
       period: isHindi ? "/दिन" : "/day",
@@ -36,6 +40,7 @@ const Pricing = () => {
       popular: false,
     },
     {
+      key: "6month",
       name: isHindi ? "6 महीने" : "6 Months",
       price: "₹499",
       period: "",
@@ -43,6 +48,7 @@ const Pricing = () => {
       popular: true,
     },
     {
+      key: "1year",
       name: isHindi ? "1 साल" : "1 Year",
       price: "₹1499",
       period: "",
@@ -76,8 +82,19 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative p-4 rounded-xl border-2 transition-all animate-sunrise ${
-                plan.popular ? "border-primary bg-primary/5 shadow-earth" : "border-border bg-card"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  navigate("/auth?redirect=/pricing");
+                  return;
+                }
+                setSelectedPlan(selectedPlan === plan.key ? null : plan.key);
+              }}
+              className={`relative p-4 rounded-xl border-2 transition-all animate-sunrise cursor-pointer ${
+                selectedPlan === plan.key
+                  ? "border-primary bg-primary/10 shadow-earth ring-2 ring-primary/30"
+                  : plan.popular
+                  ? "border-primary bg-primary/5 shadow-earth"
+                  : "border-border bg-card"
               }`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -119,8 +136,8 @@ const Pricing = () => {
           </div>
           <p className={`text-sm text-muted-foreground mb-3 ${isHindi ? 'font-hindi' : ''}`}>
             {isHindi
-              ? "नीचे दिए गए UPI ID पर भुगतान करें, फिर कोड डालकर सदस्यता शुरू करें।"
-              : "Pay to the UPI ID below, then enter your code to activate."}
+              ? "नीचे दिए गए UPI ID पर भुगतान करें, फिर स्क्रीनशॉट अपलोड करें — AI तुरंत सत्यापित करेगा!"
+              : "Pay to the UPI ID below, then upload the screenshot — AI verifies instantly!"}
           </p>
           <div className="flex items-center gap-2 bg-muted rounded-lg p-3">
             <span className="font-mono text-lg font-semibold text-foreground flex-1">{UPI_ID}</span>
@@ -129,12 +146,15 @@ const Pricing = () => {
             </Button>
           </div>
           <div className={`mt-3 text-xs text-muted-foreground space-y-1 ${isHindi ? 'font-hindi' : ''}`}>
-            <p>{isHindi ? "1. ऊपर दिए गए UPI ID पर अपने प्लान का भुगतान करें" : "1. Pay your plan amount to the UPI ID above"}</p>
-            <p>{isHindi ? "2. भुगतान के बाद WhatsApp पर स्क्रीनशॉट भेजें" : "2. Send payment screenshot via WhatsApp"}</p>
-            <p>{isHindi ? "3. आपको 9 अंकों का कोड मिलेगा" : "3. You'll receive a 9-digit activation code"}</p>
-            <p>{isHindi ? "4. कोड डालकर सदस्यता शुरू करें" : "4. Enter the code to activate your subscription"}</p>
+            <p>{isHindi ? "1. ऊपर प्लान चुनें" : "1. Select a plan above"}</p>
+            <p>{isHindi ? "2. UPI ID पर भुगतान करें" : "2. Pay to the UPI ID"}</p>
+            <p>{isHindi ? "3. भुगतान का स्क्रीनशॉट अपलोड करें" : "3. Upload payment screenshot"}</p>
+            <p>{isHindi ? "4. AI तुरंत सत्यापित करेगा और सदस्यता शुरू!" : "4. AI verifies instantly & activates!"}</p>
           </div>
         </div>
+
+        {/* AI Payment Verification */}
+        {isAuthenticated && <PaymentVerification selectedPlan={selectedPlan} />}
 
         {/* Feature comparison */}
         <div className="mt-10">

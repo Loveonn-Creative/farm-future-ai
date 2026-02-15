@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      payment_verifications: {
+        Row: {
+          ai_confidence: number | null
+          ai_response: Json | null
+          amount_expected: number | null
+          amount_verified: number | null
+          created_at: string
+          id: string
+          plan_type: string
+          screenshot_url: string
+          transaction_id: string | null
+          upi_id_verified: string | null
+          user_id: string
+          verification_status: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_response?: Json | null
+          amount_expected?: number | null
+          amount_verified?: number | null
+          created_at?: string
+          id?: string
+          plan_type?: string
+          screenshot_url: string
+          transaction_id?: string | null
+          upi_id_verified?: string | null
+          user_id: string
+          verification_status?: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_response?: Json | null
+          amount_expected?: number | null
+          amount_verified?: number | null
+          created_at?: string
+          id?: string
+          plan_type?: string
+          screenshot_url?: string
+          transaction_id?: string | null
+          upi_id_verified?: string | null
+          user_id?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
