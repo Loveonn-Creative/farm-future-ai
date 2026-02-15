@@ -58,7 +58,7 @@ const Pricing = () => {
   ];
 
   const features = [
-    { name: isHindi ? "रोज़ाना मिट्टी जांच" : "Daily Soil Scan", free: isHindi ? "1 बार" : "1x", premium: isHindi ? "असीमित" : "Unlimited" },
+    { name: isHindi ? "मिट्टी जांच" : "Soil Scans", free: isHindi ? "10/महीना" : "10/month", premium: isHindi ? "असीमित" : "Unlimited" },
     { name: isHindi ? "फसल की सलाह" : "Crop Recommendations", free: false, premium: true },
     { name: isHindi ? "कीट/रोग चेतावनी" : "Pest/Disease Alerts", free: false, premium: true },
     { name: isHindi ? "फसल बेचने में मदद" : "Market Access", free: false, premium: true },
@@ -210,14 +210,19 @@ const Pricing = () => {
         </div>
 
         {/* CTA */}
-        <div className="mt-8 text-center">
-          <Button size="lg" onClick={handlePlanSelect} className={`w-full text-lg py-6 ${isHindi ? 'font-hindi' : ''}`}>
-            {isHindi ? "कोड डालकर शुरू करें" : "Enter Code to Activate"}
-          </Button>
-          <p className={`text-xs text-muted-foreground mt-3 ${isHindi ? 'font-hindi' : ''}`}>
-            {isHindi ? "कभी भी बंद कर सकते हैं" : "Cancel anytime"}
-          </p>
-        </div>
+        {!isPremium && (
+          <div className="mt-8 text-center">
+            <Button size="lg" onClick={() => {
+              if (!isAuthenticated) navigate("/auth?redirect=/pricing");
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} className={`w-full text-lg py-6 ${isHindi ? 'font-hindi' : ''}`}>
+              {isHindi ? "प्रीमियम में अपग्रेड करें" : "Upgrade to Premium"}
+            </Button>
+            <p className={`text-xs text-muted-foreground mt-3 ${isHindi ? 'font-hindi' : ''}`}>
+              {isHindi ? "कभी भी बंद कर सकते हैं" : "Cancel anytime"}
+            </p>
+          </div>
+        )}
 
         {/* Cross-navigation */}
         <section className="py-6 flex flex-wrap justify-center gap-4 text-sm border-t border-border mt-8">

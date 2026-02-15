@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
-import { Camera, Upload, FileText, Leaf, Droplets, FlaskConical, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Upload, FileText, Leaf, Droplets, FlaskConical, Loader2, CheckCircle2, AlertCircle, RefreshCw, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/Layout';
+import { useScanLimit } from '@/hooks/use-scan-limit';
 
 interface SoilAnalysis {
   soil_type?: string;
@@ -37,6 +39,8 @@ const SoilScanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { canScan, remaining, limit, isPremium, incrementCount } = useScanLimit();
 
   const startCamera = async () => {
     try {
@@ -112,6 +116,15 @@ const SoilScanner = () => {
       return;
     }
 
+    if (!canScan) {
+      toast({
+        title: "Scan limit reached",
+        description: `Free plan allows ${limit} scans/month. Upgrade to Premium for unlimited scans.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     setAnalysis(null);
 
@@ -148,6 +161,8 @@ const SoilScanner = () => {
         raw_response: data,
         session_id: sessionId
       });
+
+      incrementCount();
 
       toast({
         title: "Analysis Complete",
@@ -201,6 +216,27 @@ const SoilScanner = () => {
               Real-time soil analysis powered by Gemini AI with precision-level reporting
             </p>
           </div>
+
+          {/* Scan limit indicator */}
+          {!isPremium && (
+            <div className={`flex items-center justify-between rounded-xl p-4 border ${canScan ? 'bg-accent/10 border-accent/20' : 'bg-destructive/10 border-destructive/30'}`}>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {canScan
+                    ? `${remaining} of ${limit} free scans remaining this month`
+                    : "Monthly scan limit reached"}
+                </p>
+                {!canScan && (
+                  <p className="text-xs text-muted-foreground mt-0.5">Upgrade for unlimited scans</p>
+                )}
+              </div>
+              {!canScan && (
+                <Button size="sm" onClick={() => navigate('/pricing')}>
+                  <Crown className="w-3 h-3 mr-1" /> Upgrade
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Scanner Tabs */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
