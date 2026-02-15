@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) await fetchSubscription(user.id);
   };
 
-  const isPremium = !!subscription?.is_active;
+  const isPremium = !!subscription?.is_active && subscription?.plan_type !== 'free';
 
   return (
     <AuthContext.Provider
