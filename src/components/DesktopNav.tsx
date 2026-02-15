@@ -33,13 +33,11 @@ const DesktopNav = () => {
   const isActive = (path: string) => location.pathname === path;
 
   // Determine CTA button
-  const ctaLink = !isAuthenticated ? "/pricing" : isPremium ? "/profile" : "/pricing";
+  const ctaLink = !isAuthenticated ? "/pricing" : "/profile";
   const ctaLabel = !isAuthenticated
     ? t('nav_subscribe')
-    : isPremium
-      ? (isHindi ? "प्रोफ़ाइल" : "Profile")
-      : (isHindi ? "अपग्रेड करें" : "Upgrade");
-  const CtaIcon = isPremium ? User : Crown;
+    : (isHindi ? "प्रोफ़ाइल" : "Profile");
+  const CtaIcon = isAuthenticated ? User : Crown;
 
   return (
     <nav className="hidden md:flex items-center justify-between px-6 py-3 bg-card border-b border-border">

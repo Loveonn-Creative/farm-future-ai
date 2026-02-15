@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { User, MapPin, Wheat, LogOut, Crown, Settings, ChevronRight, Loader2, Save, CreditCard, Shield, Mail, Phone as PhoneIcon, Lock } from "lucide-react";
+import { User, MapPin, Wheat, LogOut, Crown, Settings, ChevronRight, Loader2, Save, CreditCard, Shield, Mail, Phone as PhoneIcon, Lock, BarChart3 } from "lucide-react";
+import { useScanLimit } from "@/hooks/use-scan-limit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -136,63 +137,13 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Subscription section */}
-        <div className="bg-card rounded-xl border border-border p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <CreditCard className="w-4 h-4 text-primary" />
-            <h3 className={`font-semibold text-foreground ${isHindi ? "font-hindi" : ""}`}>
-              {isHindi ? "सदस्यता" : "Subscription"}
-            </h3>
-          </div>
-          {isPremium && subscription ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 bg-success/10 px-3 py-2 rounded-lg">
-                <Crown className="w-4 h-4 text-success" />
-                <span className={`text-sm font-semibold text-success ${isHindi ? "font-hindi" : ""}`}>
-                  {isHindi ? "प्रीमियम सक्रिय ✓" : "Premium Active ✓"}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
-                  {isHindi ? "प्लान" : "Plan"}
-                </span>
-                <span className="font-medium text-foreground capitalize">{subscription.plan_type}</span>
-              </div>
-              {subscription.expires_at && (
-                <div className="flex justify-between text-sm">
-                  <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
-                    {isHindi ? "समाप्ति" : "Expires"}
-                  </span>
-                  <span className="font-medium text-foreground">
-                    {new Date(subscription.expires_at).toLocaleDateString("hi-IN")}
-                  </span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Freemium tier info */}
-              <div className="flex items-center gap-2 bg-accent/10 px-3 py-2 rounded-lg">
-                <span className={`text-sm font-medium text-foreground ${isHindi ? "font-hindi" : ""}`}>
-                  {isHindi ? "फ्री प्लान" : "Free Plan"}
-                </span>
-              </div>
-              <ul className={`text-xs text-muted-foreground space-y-1 ${isHindi ? "font-hindi" : ""}`}>
-                <li>✓ {isHindi ? "प्रतिमाह 10 मिट्टी जांच" : "10 soil scans per month"}</li>
-                <li>✓ {isHindi ? "बुनियादी AI रिपोर्ट" : "Basic AI reports"}</li>
-                <li className="text-muted-foreground/60">✗ {isHindi ? "विस्तृत रिपोर्ट (प्रीमियम)" : "Detailed reports (Premium)"}</li>
-                <li className="text-muted-foreground/60">✗ {isHindi ? "व्यक्तिगत सलाह (प्रीमियम)" : "Personalized advice (Premium)"}</li>
-              </ul>
-              <Button
-                onClick={() => navigate("/pricing")}
-                className={`w-full ${isHindi ? "font-hindi" : ""}`}
-              >
-                <Crown className="w-4 h-4 mr-2" />
-                {isHindi ? "प्रीमियम में अपग्रेड करें" : "Upgrade to Premium"}
-              </Button>
-            </div>
-          )}
-        </div>
+        {/* Subscription & Usage section */}
+        <SubscriptionSection
+          isPremium={isPremium}
+          subscription={subscription}
+          isHindi={isHindi}
+          navigate={navigate}
+        />
 
         {/* Farming profile */}
         <div className="bg-card rounded-xl border border-border p-5">
@@ -385,6 +336,92 @@ const Profile = () => {
           {isHindi ? "लॉग आउट करें" : "Sign Out"}
         </Button>
       </main>
+    </div>
+  );
+};
+
+const SubscriptionSection = ({ isPremium, subscription, isHindi, navigate }: {
+  isPremium: boolean;
+  subscription: any;
+  isHindi: boolean;
+  navigate: (path: string) => void;
+}) => {
+  const { remaining, limit, loading: scanLoading } = useScanLimit();
+
+  return (
+    <div className="bg-card rounded-xl border border-border p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <CreditCard className="w-4 h-4 text-primary" />
+        <h3 className={`font-semibold text-foreground ${isHindi ? "font-hindi" : ""}`}>
+          {isHindi ? "सदस्यता प्रबंधन" : "Manage Subscription"}
+        </h3>
+      </div>
+
+      {isPremium && subscription ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 bg-success/10 px-3 py-2 rounded-lg">
+            <Crown className="w-4 h-4 text-success" />
+            <span className={`text-sm font-semibold text-success ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi ? "प्रीमियम सक्रिय ✓" : "Premium Active ✓"}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi ? "प्लान" : "Plan"}
+            </span>
+            <span className="font-medium text-foreground capitalize">{subscription.plan_type}</span>
+          </div>
+          {subscription.expires_at && (
+            <div className="flex justify-between text-sm">
+              <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
+                {isHindi ? "समाप्ति" : "Expires"}
+              </span>
+              <span className="font-medium text-foreground">
+                {new Date(subscription.expires_at).toLocaleDateString("hi-IN")}
+              </span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between bg-accent/10 px-3 py-2 rounded-lg">
+            <span className={`text-sm font-medium text-foreground ${isHindi ? "font-hindi" : ""}`}>
+              {isHindi ? "फ्री प्लान" : "Free Plan"}
+            </span>
+            <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+              {isHindi ? "सक्रिय" : "Active"}
+            </span>
+          </div>
+
+          {/* Scan usage */}
+          {!scanLoading && (
+            <div className="flex items-center gap-2 text-sm">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <span className={`text-muted-foreground ${isHindi ? "font-hindi" : ""}`}>
+                {isHindi
+                  ? `${remaining} / ${limit} जांच शेष`
+                  : `${remaining} of ${limit} scans remaining`}
+              </span>
+            </div>
+          )}
+
+          <ul className={`text-xs text-muted-foreground space-y-1 ${isHindi ? "font-hindi" : ""}`}>
+            <li>✓ {isHindi ? "प्रतिमाह 10 मिट्टी जांच" : "10 soil scans per month"}</li>
+            <li>✓ {isHindi ? "बुनियादी AI रिपोर्ट" : "Basic AI reports"}</li>
+            <li className="text-muted-foreground/60">✗ {isHindi ? "विस्तृत रिपोर्ट (प्रीमियम)" : "Detailed reports (Premium)"}</li>
+            <li className="text-muted-foreground/60">✗ {isHindi ? "व्यक्तिगत सलाह (प्रीमियम)" : "Personalized advice (Premium)"}</li>
+          </ul>
+
+          <Button
+            variant="outline"
+            onClick={() => navigate("/pricing")}
+            className={`w-full ${isHindi ? "font-hindi" : ""}`}
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            {isHindi ? "प्रीमियम में अपग्रेड करें" : "Upgrade to Premium"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
